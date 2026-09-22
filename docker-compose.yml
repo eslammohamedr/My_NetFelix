@@ -1,0 +1,125 @@
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:latest
+    container_name: netfelix-homepage
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ${CONFIG_ROOT}/homepage:/app/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - HOMEPAGE_ALLOWED_HOSTS=192.168.1.15:3000,localhost:3000,127.0.0.1:3000
+
+  jellyfin:
+    image: jellyfin/jellyfin:latest
+    container_name: netfelix-jellyfin
+    restart: unless-stopped
+    user: "${PUID}:${PGID}"
+    ports:
+      - "8096:8096"
+    volumes:
+      - ${CONFIG_ROOT}/jellyfin:/config
+      - ${CONFIG_ROOT}/jellyfin/cache:/cache
+      - ${MEDIA_ROOT}/media:/data/media:rw
+    devices:
+      - /dev/dri:/dev/dri
+    environment:
+      - TZ=${TZ}
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: netfelix-jellyseerr
+    restart: unless-stopped
+    ports:
+      - "5055:5055"
+    volumes:
+      - ${CONFIG_ROOT}/jellyseerr:/app/config
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}
+    depends_on:
+      - jellyfin
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: netfelix-radarr
+    restart: unless-stopped
+    ports:
+      - "7878:7878"
+    volumes:
+      - ${CONFIG_ROOT}/radarr:/config
+      - ${MEDIA_ROOT}:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: netfelix-sonarr
+    restart: unless-stopped
+    ports:
+      - "8989:8989"
+    volumes:
+      - ${CONFIG_ROOT}/sonarr:/config
+      - ${MEDIA_ROOT}:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: netfelix-prowlarr
+    restart: unless-stopped
+    ports:
+      - "9696:9696"
+    volumes:
+      - ${CONFIG_ROOT}/prowlarr:/config
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: netfelix-qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    volumes:
+      - ${CONFIG_ROOT}/qbittorrent:/config
+      - ${MEDIA_ROOT}/torrents:/data/torrents
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - WEBUI_PORT=8080
+
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: netfelix-bazarr
+    restart: unless-stopped
+    ports:
+      - "6767:6767"
+    volumes:
+      - ${CONFIG_ROOT}/bazarr:/config
+      - ${MEDIA_ROOT}/media:/data/media
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: netfelix-flaresolverr
+    restart: unless-stopped
+    ports:
+      - "8191:8191"
+    environment:
+      - LOG_LEVEL=info
+      - TZ=${TZ}

@@ -1,0 +1,15 @@
+# Local environment and live service data
+.env
+.env.*
+!.env.example
+/config/
+/media/
+/torrents/
+/downloads/
+
+# Local agent settings and temporary files
+/.agents/
+/.codex/
+*.log
+*.tmp
+.DS_Store
