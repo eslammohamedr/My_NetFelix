@@ -146,14 +146,17 @@ Live service configuration, databases, credentials, and downloaded media are exc
 
 ## Watch while downloading
 
-1. Request a movie or show in Jellyseerr as usual. Once qBittorrent has its metadata, open **Watch Now** at `http://YOUR_SERVER_IP:8090` (also linked from the local Homepage).
-2. Select the movie or episode and click **Watch now**. This enables sequential downloading, first/last-piece priority, and high priority for the selected file. It also resumes the selected torrent; other downloads are not stopped.
-3. Playback begins once the first 16 MiB and the file's final piece are verified and the file exists on disk. The rest continues downloading through qBittorrent. The page reports buffer size, download speed, and download state.
-4. If the browser cannot play the codecs/container, choose **Open playlist in VLC**, or copy the stream URL into VLC's **Open Network Stream**. Completed downloads still follow the existing Radarr/Sonarr → Jellyfin import workflow.
+1. Open **Jellyseerr** at `http://YOUR_SERVER_IP:5055` and search for a movie or show. This is the main search-and-watch entry point; opening port `8090` also redirects here.
+2. Open the title and click the new **Watch now** button. If it has not been requested, Jellyseerr opens its normal request dialog (including season selection for TV). Confirm the request to continue to playback. Existing request permissions, quotas, and approval requirements still apply.
+3. The player automatically waits for the matching download and prepares it for streaming. A movie opens automatically; a series with multiple video files lets you choose the episode. No manual torrent selection or copied link is needed. Matching uses Radarr/Sonarr download IDs, not approximate title text.
+4. Playback begins after the first 16 MiB and final file piece are downloaded and verified. If a completed title's torrent is no longer present, playback navigation falls back to its Jellyfin library page. Browser autoplay policies may require pressing Play once.
+5. Use **Open playlist in VLC** if your browser cannot play the format. Downloads continue in the background, and completed titles still import into Jellyfin. **Back to Jellyseerr** returns to the title page.
+
+The downloads overview remains available for troubleshooting at `http://YOUR_SERVER_IP:8090/downloads`. Direct title links use `/watch/movie/TMDB_ID` or `/watch/tv/TMDB_ID`.
 
 The service checks downloaded pieces before sending bytes, including HTTP byte-range requests. It never treats preallocated file size as proof that video data has downloaded. If playback catches up to the download, it waits; a request times out after 120 seconds without usable data. Retry playback after more data downloads. Seeking ahead does not reprioritize individual pieces and may take a while. Download speed and available peers still determine whether playback can remain smooth.
 
-This first version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; no transcoding or automatic subtitle integration is provided on Watch Now. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
+This version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; VLC remains the fallback for unsupported formats. Watch Now can expose English subtitle files embedded in the torrent and Arabic/English subtitle files already available through Bazarr, plus local `.srt`/`.vtt` upload with timing controls. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
 
 ### Running and troubleshooting
 
@@ -161,8 +164,15 @@ This first version supports **v1 torrents without padding files**. It rejects v2
 - The script finds the drive using `/dev/disk/by-label/Data`, mounts it if necessary, and uses its actual mount point, including `Data1`. It refuses to start when that drive or its `netfelix_data/torrents` folder is missing. Override the device when needed: `MEDIA_DEVICE=/dev/disk/by-uuid/YOUR_UUID ./netfelix.sh start`.
 - For direct `docker compose` commands, mount the drive first and set `.env`'s `MEDIA_ROOT` to its real `netfelix_data` path. Existing containers must be recreated after changing bind-mount paths.
 - The current qBittorrent installation already permits localhost access. On a fresh installation that requires login, set `QBT_USERNAME` and `QBT_PASSWORD` in your ignored `.env`; restart Watch Now. Do not commit these credentials.
+- Set `JELLYSEERR_API_KEY`, `RADARR_API_KEY`, and `SONARR_API_KEY` in the ignored `.env` using each service's settings. These keys stay on the streaming server; they are never included in browser links or responses. The default API addresses use localhost ports 5055, 7878, and 8989.
 - Watch Now mounts torrent data read-only. Its API only prepares existing video downloads; add titles through Jellyseerr/qBittorrent.
 - Inspect logs with `docker compose logs --tail=100 watch-now`.
 - Run the verification suite with `python3 -m unittest discover -s streaming/tests -v`.
 
 API behavior follows the [official qBittorrent Web API documentation](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-%28qBittorrent-5.0%29).
+
+### Jellyseerr customization
+
+`jellyseerr/Dockerfile` builds the native movie/series **Watch now** buttons against pinned Jellyseerr 2.7.3 source and a matching runtime image. The source archive checksum is verified. `patch.cjs` fails if the expected component insertion points change. The rest of Jellyseerr, including its existing **Play on Jellyfin** and request controls, remains available.
+
+Run `docker compose build jellyseerr watch-now` after changing either implementation, then `docker compose up -d jellyseerr watch-now`. The initial Jellyseerr build takes several minutes on this laptop; subsequent unchanged starts reuse its image. Upstream upgrades require deliberately updating the source checksum/image digest and verifying the patch and build. Runtime configuration and API keys remain excluded from Git.

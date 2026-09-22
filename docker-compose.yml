@@ -10,12 +10,24 @@ services:
       QBT_URL: http://127.0.0.1:8080
       QBT_USERNAME: ${QBT_USERNAME:-}
       QBT_PASSWORD: ${QBT_PASSWORD:-}
+      JELLYSEERR_API_KEY: ${JELLYSEERR_API_KEY:-}
+      RADARR_API_KEY: ${RADARR_API_KEY:-}
+      SONARR_API_KEY: ${SONARR_API_KEY:-}
+      BAZARR_API_KEY: ${BAZARR_API_KEY:-}
+      BAZARR_URL: http://127.0.0.1:6767
       TORRENT_ROOT: /data/torrents
+      MEDIA_ROOT: /data/media
       PORT: "8090"
     volumes:
       - type: bind
         source: ${MEDIA_ROOT}/torrents
         target: /data/torrents
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${MEDIA_ROOT}/media
+        target: /data/media
         read_only: true
         bind:
           create_host_path: false
@@ -60,7 +72,8 @@ services:
       - TZ=${TZ}
 
   jellyseerr:
-    image: fallenbagel/jellyseerr:latest
+    build: ./jellyseerr
+    image: my_netfelix-jellyseerr
     container_name: netfelix-jellyseerr
     restart: unless-stopped
     ports:

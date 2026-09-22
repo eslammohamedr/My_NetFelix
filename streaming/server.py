@@ -11,6 +11,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib import error, parse, request
+from catalog import CatalogError, resolve
 
 QBT_URL = os.getenv('QBT_URL', 'http://127.0.0.1:8080').rstrip('/')
 ROOT = Path(os.getenv('TORRENT_ROOT', '/data/torrents')).resolve()
@@ -18,8 +19,60 @@ QBT_ROOT = Path(os.getenv('QBT_TORRENT_ROOT', '/data/torrents'))
 BUFFER = int(os.getenv('BUFFER_BYTES', str(16 * 1024 * 1024)))
 WAIT_SECONDS = int(os.getenv('STREAM_WAIT_SECONDS', '120'))
 VIDEO_EXTENSIONS = {'.mp4', '.m4v', '.webm', '.mkv', '.avi', '.mov', '.ts'}
+SUBTITLE_EXTENSIONS = {'.srt', '.vtt'}
+MEDIA_ROOT = Path(os.getenv('MEDIA_ROOT', '/data/media')).resolve()
+BAZARR_URL = os.getenv('BAZARR_URL', 'http://127.0.0.1:6767').rstrip('/')
+BAZARR_API_KEY = os.getenv('BAZARR_API_KEY', '')
 BAD_STATES = {'missingFiles', 'error', 'checkingDL', 'checkingUP', 'checkingResumeData', 'moving'}
 PREPARE_LOCK = threading.Lock()
+
+LANG_CODES = {
+    'en': ('English', 'en'), 'eng': ('English', 'en'), 'english': ('English', 'en'),
+    'ar': ('Arabic', 'ar'), 'ara': ('Arabic', 'ar'), 'arabic': ('Arabic', 'ar'),
+    'es': ('Spanish', 'es'), 'spa': ('Spanish', 'es'), 'spanish': ('Spanish', 'es'),
+    'fr': ('French', 'fr'), 'fre': ('French', 'fr'), 'fra': ('French', 'fr'), 'french': ('French', 'fr'),
+    'de': ('German', 'de'), 'ger': ('German', 'de'), 'deu': ('German', 'de'), 'german': ('German', 'de'),
+    'it': ('Italian', 'it'), 'ita': ('Italian', 'it'), 'italian': ('Italian', 'it'),
+    'pt': ('Portuguese', 'pt'), 'por': ('Portuguese', 'pt'), 'portuguese': ('Portuguese', 'pt'),
+    'ru': ('Russian', 'ru'), 'rus': ('Russian', 'ru'), 'russian': ('Russian', 'ru'),
+    'zh': ('Chinese', 'zh'), 'chi': ('Chinese', 'zh'), 'chinese': ('Chinese', 'zh'),
+    'ja': ('Japanese', 'ja'), 'jpn': ('Japanese', 'ja'), 'japanese': ('Japanese', 'ja'),
+    'ko': ('Korean', 'ko'), 'kor': ('Korean', 'ko'), 'korean': ('Korean', 'ko'),
+    'tr': ('Turkish', 'tr'), 'tur': ('Turkish', 'tr'), 'turkish': ('Turkish', 'tr'),
+    'hi': ('Hindi', 'hi'), 'hin': ('Hindi', 'hi'), 'hindi': ('Hindi', 'hi'),
+    'fa': ('Persian', 'fa'), 'per': ('Persian', 'fa'), 'fas': ('Persian', 'fa'), 'persian': ('Persian', 'fa'),
+    'nl': ('Dutch', 'nl'), 'dut': ('Dutch', 'nl'), 'nld': ('Dutch', 'nl'), 'dutch': ('Dutch', 'nl'),
+    'pl': ('Polish', 'pl'), 'pol': ('Polish', 'pl'), 'polish': ('Polish', 'pl'),
+    'sv': ('Swedish', 'sv'), 'swe': ('Swedish', 'sv'), 'swedish': ('Swedish', 'sv'),
+}
+
+
+def detect_language(filename: str):
+    stem = Path(filename).stem.lower()
+    is_sdh = any(term in stem for term in ('sdh', '.hi.', '_hi', '-hi', 'hearing impaired'))
+    parts = re.split(r'[\s._\-+]+', stem)
+    name, code = 'English', 'en'
+    for part in parts:
+        if part in LANG_CODES:
+            name, code = LANG_CODES[part]
+            break
+    if is_sdh:
+        name += ' [SDH]'
+    return name, code
+
+
+def srt_to_vtt(srt_bytes: bytes) -> str:
+    for enc in ('utf-8-sig', 'utf-8', 'cp1256', 'cp1252', 'latin-1'):
+        try:
+            text = srt_bytes.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    else:
+        text = srt_bytes.decode('utf-8', errors='replace')
+    text = text.replace('\r\n', '\n').replace('\r', '\n')
+    text = re.sub(r'(\d{2}:\d{2}:\d{2}),(\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}),(\d{3})', r'\1.\2 --> \3.\4', text)
+    return 'WEBVTT\n\n' + text.lstrip()
 
 
 class Problem(Exception):
@@ -186,6 +239,63 @@ def local_path(torrent, file, properties):
     raise Problem('Video file is not on disk yet. Check the mounted drive or wait for downloading to start.')
 
 
+def get_subtitles(h, torrent, properties):
+    subtitles = []
+    # 1. External subtitles in torrent
+    try:
+        files = qbt.call('torrents/files', hash=h)
+        for f in files:
+            ext = Path(f['name']).suffix.lower()
+            if ext in SUBTITLE_EXTENSIONS:
+                label, lang = detect_language(f['name'])
+                ready = False
+                try:
+                    local_path(torrent, f, properties)
+                    ready = True
+                except Problem:
+                    ready = f.get('progress', 0) == 1.0
+                subtitles.append({
+                    'id': f"torrent-{f['index']}",
+                    'label': label,
+                    'lang': lang,
+                    'url': f"/subtitles/torrent/{h}/{f['index']}.vtt",
+                    'ready': ready,
+                    'source': 'torrent'
+                })
+    except Exception:
+        logging.debug('Could not check torrent files for subtitles', exc_info=True)
+
+    # 2. Subtitles from Bazarr / media library
+    if BAZARR_API_KEY:
+        try:
+            req = request.Request(f"{BAZARR_URL}/api/movies", headers={'X-Api-Key': BAZARR_API_KEY})
+            with request.urlopen(req, timeout=3) as resp:
+                data = json.load(resp).get('data', [])
+            torrent_name = torrent.get('name', '').lower()
+            for movie in data:
+                title = movie.get('title', '').lower()
+                scene = (movie.get('sceneName') or '').lower()
+                if (title and title in torrent_name) or (scene and scene in torrent_name):
+                    for b_sub in movie.get('subtitles', []):
+                        sub_id = b_sub.get('id')
+                        if sub_id:
+                            sub_name = b_sub.get('name', 'Unknown')
+                            if b_sub.get('hi'):
+                                sub_name += ' [SDH]'
+                            subtitles.append({
+                                'id': f"bazarr-{sub_id}",
+                                'label': f"{sub_name} (Bazarr)",
+                                'lang': b_sub.get('code2', 'en'),
+                                'url': f"/subtitles/bazarr/{sub_id}.vtt",
+                                'ready': True,
+                                'source': 'bazarr'
+                            })
+                    break
+        except Exception:
+            logging.debug('Could not query Bazarr for subtitles', exc_info=True)
+    return subtitles
+
+
 def readiness(h, index):
     torrent, file, properties, offset, piece_size = context(h, index)
     states = qbt.call('torrents/pieceStates', hash=h)
@@ -201,7 +311,8 @@ def readiness(h, index):
     return {'ready': available >= target and tail_ready and on_disk,
             'buffer_bytes': available, 'target_bytes': target, 'tail_ready': tail_ready,
             'progress': file['progress'], 'speed': torrent.get('dlspeed', 0),
-            'state': torrent['state'], 'on_disk': on_disk}
+            'state': torrent['state'], 'on_disk': on_disk,
+            'subtitles': get_subtitles(h, torrent, properties)}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -244,7 +355,14 @@ class Handler(BaseHTTPRequestHandler):
                     self.close_connection = True
                     raise Problem('Request body is not supported.', 400)
             if path == '/' and not mutate:
+                self.reply(302, b'', extra={'Location': '/search'})
+            elif path == '/search' and not mutate:
+                self.reply(200, Path(__file__).with_name('search.html').read_bytes(), 'text/html; charset=utf-8')
+            elif (path == '/downloads' or re.fullmatch(r'/watch/(movie|tv)/[1-9][0-9]*', path)) and not mutate:
                 self.reply(200, Path(__file__).with_name('index.html').read_bytes(), 'text/html; charset=utf-8')
+            elif re.fullmatch(r'/api/resolve/(movie|tv)/[1-9][0-9]*', path) and not mutate:
+                _, _, _, media_type, tmdb_id = path.split('/')
+                self.reply(200, resolve(media_type, int(tmdb_id), qbt))
             elif path == '/health' and not mutate:
                 self.reply(200, {'status': 'ok'})
             elif path == '/api/downloads' and not mutate:
@@ -255,6 +373,62 @@ class Handler(BaseHTTPRequestHandler):
                         'files': [{'index': f['index'], 'name': f['name'], 'size': f['size'], 'progress': f['progress']}
                                   for f in files if Path(f['name']).suffix.lower() in VIDEO_EXTENSIONS]})
                 self.reply(200, result)
+            sub_torrent_match = re.fullmatch(r'/subtitles/torrent/([a-fA-F0-9]{40}|[a-fA-F0-9]{64})/(\d+)\.vtt', path)
+            sub_bazarr_match = re.fullmatch(r'/subtitles/bazarr/(\d+)\.vtt', path)
+            if sub_torrent_match and not mutate:
+                h, sub_idx = sub_torrent_match.groups()
+                torrent = checked_torrent(h)
+                files = qbt.call('torrents/files', hash=h)
+                sub_file = next((f for f in files if f['index'] == int(sub_idx)), None)
+                if not sub_file or Path(sub_file['name']).suffix.lower() not in SUBTITLE_EXTENSIONS:
+                    raise Problem('Subtitle file not found.', 404)
+                properties = qbt.call('torrents/properties', hash=h)
+                p = local_path(torrent, sub_file, properties)
+                raw = p.read_bytes()
+                vtt = srt_to_vtt(raw) if p.suffix.lower() == '.srt' else raw.decode('utf-8', errors='replace')
+                self.reply(200, vtt.encode('utf-8'), 'text/vtt; charset=utf-8', {
+                    'Access-Control-Allow-Origin': '*',
+                    'Cache-Control': 'public, max-age=3600'
+                })
+            elif sub_bazarr_match and not mutate:
+                sub_id = int(sub_bazarr_match.group(1))
+                if not BAZARR_API_KEY:
+                    raise Problem('Bazarr is not configured.', 503)
+                req = request.Request(f"{BAZARR_URL}/api/movies", headers={'X-Api-Key': BAZARR_API_KEY})
+                with request.urlopen(req, timeout=5) as resp:
+                    movies = json.load(resp).get('data', [])
+                target_sub = None
+                for m in movies:
+                    for s_item in m.get('subtitles', []):
+                        if s_item.get('id') == sub_id:
+                            target_sub = s_item
+                            break
+                    if target_sub:
+                        break
+                if not target_sub or not target_sub.get('path'):
+                    raise Problem('Subtitle not found in Bazarr.', 404)
+                sub_path_str = target_sub['path']
+                candidate_path = Path(sub_path_str)
+                if candidate_path.is_file():
+                    raw = candidate_path.read_bytes()
+                    vtt = srt_to_vtt(raw) if candidate_path.suffix.lower() == '.srt' else raw.decode('utf-8', errors='replace')
+                else:
+                    params = parse.urlencode({'subtitlePath': sub_path_str})
+                    c_req = request.Request(f"{BAZARR_URL}/api/subtitles/contents?{params}", headers={'X-Api-Key': BAZARR_API_KEY})
+                    with request.urlopen(c_req, timeout=10) as c_resp:
+                        c_data = json.load(c_resp).get('data', [])
+                    vtt_lines = ['WEBVTT\n']
+                    for cue in c_data:
+                        s_cue = cue.get('start', {})
+                        e_cue = cue.get('end', {})
+                        s_str = f"{s_cue.get('hours', 0):02d}:{s_cue.get('minutes', 0):02d}:{s_cue.get('seconds', 0):02d}.{s_cue.get('microseconds', 0)//1000:03d}"
+                        e_str = f"{e_cue.get('hours', 0):02d}:{e_cue.get('minutes', 0):02d}:{e_cue.get('seconds', 0):02d}.{e_cue.get('microseconds', 0)//1000:03d}"
+                        vtt_lines.append(f"{cue.get('index', '')}\n{s_str} --> {e_str}\n{cue.get('content', '')}\n")
+                    vtt = '\n'.join(vtt_lines)
+                self.reply(200, vtt.encode('utf-8'), 'text/vtt; charset=utf-8', {
+                    'Access-Control-Allow-Origin': '*',
+                    'Cache-Control': 'public, max-age=3600'
+                })
             else:
                 match = re.fullmatch(r'/(api/prepare|api/status|stream|playlist)/([a-fA-F0-9]{40}|[a-fA-F0-9]{64})/(\d+)', path)
                 if not match:
@@ -270,7 +444,16 @@ class Handler(BaseHTTPRequestHandler):
                             qbt.call('torrents/toggleSequentialDownload', data={'hashes': h}, raw=True)
                         if not torrent.get('f_l_piece_prio'):
                             qbt.call('torrents/toggleFirstLastPiecePrio', data={'hashes': h}, raw=True)
+                        files = qbt.call('torrents/files', hash=h)
+                        video_files = [f for f in files if Path(f['name']).suffix.lower() in VIDEO_EXTENSIONS]
+                        if len(video_files) > 1:
+                            other_ids = [str(f['index']) for f in video_files if f['index'] != index]
+                            if other_ids:
+                                qbt.call('torrents/filePrio', data={'hash': h, 'id': '|'.join(other_ids), 'priority': 1}, raw=True)
                         qbt.call('torrents/filePrio', data={'hash': h, 'id': index, 'priority': 7}, raw=True)
+                        for f in files:
+                            if Path(f['name']).suffix.lower() in SUBTITLE_EXTENSIONS:
+                                qbt.call('torrents/filePrio', data={'hash': h, 'id': f['index'], 'priority': 7}, raw=True)
                         qbt.call('torrents/start', data={'hashes': h}, raw=True)
                     self.reply(200, {'prepared': True})
                 elif action == 'api/status':
@@ -281,12 +464,24 @@ class Handler(BaseHTTPRequestHandler):
                     if not re.fullmatch(r'[a-zA-Z0-9.\-\[\]:]+', host):
                         raise Problem('Invalid host.', 400)
                     checked_torrent(h)
-                    body = f'#EXTM3U\nhttp://{host}/stream/{h}/{index}\n'.encode()
+                    body_lines = ['#EXTM3U']
+                    try:
+                        torrent, file, properties, _, _ = context(h, index)
+                        subs = get_subtitles(h, torrent, properties)
+                        ready_subs = [s for s in subs if s.get('ready')]
+                        if ready_subs:
+                            body_lines.append(f"#EXTVLCOPT:sub-file=http://{host}{ready_subs[0]['url']}")
+                    except Exception:
+                        pass
+                    body_lines.append(f'http://{host}/stream/{h}/{index}\n')
+                    body = '\n'.join(body_lines).encode()
                     self.reply(200, body, 'audio/x-mpegurl', {'Content-Disposition': 'attachment; filename="NetFelix.m3u"'})
                 else:
                     self.stream(h, index)
         except Problem as exc:
             self.reply(exc.status, {'error': str(exc)})
+        except CatalogError as exc:
+            self.reply(503, {'error': str(exc)})
         except (BrokenPipeError, ConnectionResetError, socket.timeout):
             self.close_connection = True
         except Exception:

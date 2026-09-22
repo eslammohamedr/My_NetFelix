@@ -2,23 +2,410 @@
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NetFelix · Watch Now</title>
 <style>
 :root{color-scheme:dark;font-family:system-ui,sans-serif;background:#101116;color:#f5f5f7}body{max-width:1000px;margin:auto;padding:28px 20px}header{display:flex;justify-content:space-between;align-items:center;gap:20px}h1{margin-bottom:4px}h2{font-size:1.15rem;overflow-wrap:anywhere}p{color:#b6b8c5;line-height:1.6}a{color:#aebcff}button,.button{display:inline-block;background:#e4314e;color:white;border:0;border-radius:8px;padding:11px 17px;font:inherit;cursor:pointer;text-decoration:none}button:disabled{opacity:.5;cursor:wait}article,#player{background:#1b1d26;border:1px solid #30323f;border-radius:12px;padding:20px;margin:18px 0}select{width:100%;padding:12px;margin:12px 0;background:#101116;color:white;border:1px solid #444;border-radius:6px}progress{width:100%;accent-color:#e4314e}video{width:100%;max-height:65vh;background:black;border-radius:8px}#error{color:#ffb4b4}.actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.badge{font-size:.85rem;color:#c7c9d5}#status{min-height:1.5em}.secondary{background:#34384c}small{color:#b6b8c5}[hidden]{display:none!important}
+.notice-card{border-radius:12px;padding:22px;margin:20px 0;background:#1b1d26;border:1px solid #30323f}
+.notice-card.warning{border-color:#f59e0b;background:rgba(245,158,11,0.08)}
+.notice-card.info{border-color:#3b82f6;background:rgba(59,130,246,0.08)}
+.notice-header{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.notice-icon{font-size:2.2rem;line-height:1}
+.notice-header h3{margin:0 0 4px 0;font-size:1.25rem}
+.notice-card.warning h3{color:#fbbf24}
+.notice-card.info h3{color:#60a5fa}
+.notice-subtitle{margin:0;color:#9ca3af;font-size:.95rem}
+.date-badges{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.date-badge{background:#232635;border:1px solid #3a3d52;padding:6px 12px;border-radius:6px;font-size:.85rem;color:#e5e7eb}
+.date-badge.highlight{border-color:#f59e0b;color:#fbbf24;background:rgba(245,158,11,0.18)}
+.notice-note{color:#d1d5db;line-height:1.6;margin:10px 0}
+.notice-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+::cue{background:rgba(0,0,0,0.85)!important;color:#fff!important;font-family:system-ui,-apple-system,sans-serif!important;font-size:1.15rem!important;line-height:1.4!important;text-shadow:0 2px 4px rgba(0,0,0,0.95)!important;padding:4px 8px!important;border-radius:4px!important}
+.sub-bar{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:#14161f;border:1px solid #2a2d3e;border-radius:8px;padding:10px 14px;margin-top:14px}
+.sub-group{display:flex;align-items:center;gap:8px}
+.sub-bar select{width:auto;margin:0;padding:6px 12px;background:#202330;border:1px solid #3c4055;border-radius:6px;font-size:.9rem;color:#f5f5f7}
+.sub-sync-btn{padding:5px 9px;font-size:.85rem}
+.sub-sync-val{font-size:.85rem;min-width:3.4em;text-align:center;color:#60a5fa;font-variant-numeric:tabular-nums}
 </style></head><body>
 <header><div><h1>NetFelix <span style="color:#ff4968">Watch Now</span></h1><p>Start watching while your download continues.</p></div><button id="refresh" class="secondary">Refresh</button></header>
 <p>Request a movie or episode in <a id="requests">Jellyseerr</a>, then select its download below. Finished titles remain available in <a id="library">Jellyfin</a>.</p>
-<p id="error" role="alert"></p>
-<section id="player" hidden><h2 id="title"></h2><p id="status" role="status" aria-live="polite"></p><progress id="buffer" max="1" value="0" aria-label="Playback buffer"></progress><video id="video" controls playsinline preload="metadata" hidden></video><div class="actions" style="margin-top:14px"><a id="vlc" class="button secondary" hidden>Open playlist in VLC</a><button id="copy" class="secondary" hidden>Copy stream URL</button><button id="stop" class="secondary">Close player</button></div><p><small>Browser playback depends on the video and audio format. Use VLC if the browser cannot play it. Seeking ahead can pause playback until that part downloads. Closing this player leaves the download running.</small></p></section>
+<p id="catalog-status" role="status"></p><p><a id="back" hidden>Back to Jellyseerr</a> <a id="library-title" hidden>Play in Jellyfin</a></p><p id="error" role="alert"></p>
+<div id="notice" hidden></div>
+<section id="player" hidden><h2 id="title"></h2><p id="status" role="status" aria-live="polite"></p><progress id="buffer" max="1" value="0" aria-label="Playback buffer"></progress><div id="play-container" hidden style="margin:14px 0"><button id="big-play" class="button" style="font-size:1.15rem;padding:12px 28px">▶ Click to Play</button></div><video id="video" controls playsinline preload="metadata" hidden></video><div id="sub-bar" class="sub-bar" hidden><div class="sub-group"><span style="font-size:1.1rem">💬</span><label for="sub-select" style="font-size:.9rem;font-weight:600">Subtitles:</label><select id="sub-select"><option value="none">Off</option></select></div><div class="sub-group" id="sub-sync-group"><span style="font-size:.85rem;color:#9ca3af">Sync:</span><button id="sub-delay-minus" class="secondary sub-sync-btn" title="Show subtitles 0.5s earlier">-0.5s</button><span id="sub-delay-val" class="sub-sync-val">0.0s</span><button id="sub-delay-plus" class="secondary sub-sync-btn" title="Show subtitles 0.5s later">+0.5s</button><button id="sub-delay-reset" class="secondary sub-sync-btn" title="Reset subtitle timing" style="opacity:.8">Reset</button></div><div style="margin-left:auto"><input type="file" id="sub-file-input" accept=".srt,.vtt" hidden><button id="sub-upload-btn" class="secondary" style="padding:6px 12px;font-size:.85rem">📁 Upload Subtitle (.srt / .vtt)</button></div></div><div class="actions" style="margin-top:14px"><a id="vlc" class="button secondary" hidden>Open playlist in VLC</a><button id="copy" class="secondary" hidden>Copy stream URL</button><button id="stop" class="secondary">Close player</button></div><p><small>Browser playback depends on the video and audio format. Use VLC if the browser cannot play it. Seeking ahead can pause playback until that part downloads. Closing this player leaves the download running. Drag and drop any subtitle (.srt / .vtt) file directly onto the player to watch with it.</small></p></section>
 <main id="downloads"><p>Loading downloads…</p></main>
 <script>
-const $=id=>document.getElementById(id);let selected=null,generation=0,timer=null,streamURL='';
-for(const [id,port] of [['requests',5055],['library',8096]]){const u=new URL(location.href);u.port=port;u.pathname='/';$(id).href=u.href;}
-const mb=n=>(n/1048576).toFixed(1)+' MB';
-async function api(path,post=false){const r=await fetch(path,post?{method:'POST',headers:{'X-NetFelix':'1'}}:{});const d=await r.json();if(!r.ok)throw Error(d.error||'Request failed');return d;}
-function text(tag,value){const e=document.createElement(tag);e.textContent=value;return e;}
-async function refresh(){try{const items=await api('/api/downloads');$('error').textContent='';$('downloads').replaceChildren();if(!items.length)$('downloads').append(text('p','No downloads yet. Request a title in Jellyseerr first.'));for(const t of items){const card=document.createElement('article');card.append(text('h2',t.name));card.append(text('p',`${(t.progress*100).toFixed(1)}% downloaded · ${mb(t.dlspeed)}/s · ${t.state}`));if(t.state==='missingFiles')card.append(text('p','Files are missing. Mount the Data drive and recheck this download in qBittorrent.'));const select=document.createElement('select');select.setAttribute('aria-label','Choose video or episode');for(const f of t.files){const o=document.createElement('option');o.value=f.index;o.textContent=f.name.split('/').pop()+' · '+mb(f.size);select.append(o);}if(t.files.length){card.append(select);const button=text('button','Watch now');button.disabled=['missingFiles','error','moving','checkingDL','checkingUP','checkingResumeData'].includes(t.state);button.onclick=()=>prepare(t,t.files.find(f=>f.index===Number(select.value)));card.append(button);}else card.append(text('p','Waiting for video metadata, or no supported video files in this download.'));$('downloads').append(card);}}catch(e){$('error').textContent=e.message;} }
-function closePlayer(){generation++;clearTimeout(timer);selected=null;$('video').pause();$('video').removeAttribute('src');$('video').load();$('player').hidden=true;}
-async function prepare(t,f){closePlayer();const token=generation;selected={h:t.hash,i:f.index};$('player').hidden=false;$('video').hidden=true;$('vlc').hidden=true;$('copy').hidden=true;$('buffer').hidden=false;$('buffer').value=0;$('title').textContent=f.name.split('/').pop();$('status').textContent='Preparing download for playback…';$('player').scrollIntoView({behavior:'smooth'});try{await api(`/api/prepare/${t.hash}/${f.index}`,true);if(token!==generation)return;poll(token);}catch(e){if(token===generation)$('status').textContent=e.message;} }
-async function poll(token){if(token!==generation||!selected)return;try{const {h,i}=selected;const d=await api(`/api/status/${h}/${i}`);if(token!==generation)return;$('buffer').value=Math.min(1,d.buffer_bytes/d.target_bytes);$('status').textContent=d.ready?`Ready · ${(d.progress*100).toFixed(1)}% downloaded · ${mb(d.speed)}/s`:`Buffering ${mb(Math.min(d.buffer_bytes,d.target_bytes))} / ${mb(d.target_bytes)} · ${d.tail_ready?'video ending ready':'waiting for video ending'} · ${mb(d.speed)}/s · ${d.state}${d.on_disk?'':' · waiting for file on disk'}`;if(d.ready&&$('video').hidden){streamURL=new URL(`/stream/${h}/${i}`,location.href).href;$('video').src=streamURL;$('video').hidden=false;$('buffer').hidden=true;$('vlc').href=`/playlist/${h}/${i}`;$('vlc').hidden=false;$('copy').hidden=false;$('video').play().catch(()=>{});} }catch(e){if(token!==generation)return;$('status').textContent=e.message;}timer=setTimeout(()=>poll(token),2500);}
-$('video').addEventListener('error',()=>{$('status').textContent='The browser could not play this video, or buffering timed out. Open the playlist in VLC, or wait for more data and click Watch now again.';});
-$('copy').onclick=async()=>{try{await navigator.clipboard.writeText(streamURL);$('status').textContent='Stream URL copied. Paste it into VLC → Open Network Stream.';}catch{window.prompt('Copy this URL into VLC → Open Network Stream:',streamURL);}};
-$('stop').onclick=closePlayer;$('refresh').onclick=refresh;refresh();
+const $ = id => document.getElementById(id);
+const route = location.pathname.match(/^\/watch\/(movie|tv)\/(\d+)$/);
+let selected = null, generation = 0, timer = null, catalogTimer = null, streamURL = '';
+let autoStart = true, refreshing = false;
+const badStates = ['missingFiles','error','moving','checkingDL','checkingUP','checkingResumeData'];
+const mb = n => (n / 1048576).toFixed(1) + ' MB';
+function serviceURL(port, path = '/') {
+  const url = new URL(location.href);
+  url.port = String(port); url.pathname = '/'; url.search = ''; url.hash = '';
+  return new URL(path, url).href;
+}
+$('requests').href = serviceURL(5055);
+$('library').href = serviceURL(8096);
+if (route) {
+  $('back').href = serviceURL(5055, `/${route[1]}/${route[2]}`);
+  $('back').hidden = false;
+  $('catalog-status').textContent = 'Finding your movie or episode…';
+}
+async function api(path, post = false) {
+  const response = await fetch(path, post ? {method:'POST', headers:{'X-NetFelix':'1'}} : {});
+  const data = await response.json();
+  if (!response.ok) throw Error(data.error || 'Request failed');
+  return data;
+}
+function text(tag, value) {
+  const element = document.createElement(tag); element.textContent = value; return element;
+}
+function renderDownloads(items) {
+  // Preserve the user's episode selection while refreshing live progress.
+  const previous = new Map([...document.querySelectorAll('select[data-hash]')].map(e => [e.dataset.hash, e.value]));
+  $('downloads').replaceChildren();
+  if (!items.length && !route) $('downloads').append(text('p','No downloads yet. Search for a title in Jellyseerr.'));
+  for (const torrent of items) {
+    const card = document.createElement('article');
+    card.append(text('h2', torrent.name));
+    card.append(text('p', `${(torrent.progress * 100).toFixed(1)}% downloaded · ${mb(torrent.dlspeed)}/s · ${torrent.state}`));
+    if (torrent.state === 'missingFiles') card.append(text('p','Files are missing. Mount the Data drive and recheck this download in qBittorrent.'));
+    const select = document.createElement('select');
+    select.dataset.hash = torrent.hash;
+    select.setAttribute('aria-label','Choose video or episode');
+    for (const file of torrent.files) {
+      const option = document.createElement('option'); option.value = file.index;
+      option.textContent = file.name.split('/').pop() + ' · ' + mb(file.size); select.append(option);
+    }
+    if (previous.has(torrent.hash) && [...select.options].some(o => o.value === previous.get(torrent.hash))) select.value = previous.get(torrent.hash);
+    if (torrent.files.length) {
+      card.append(select);
+      const isCurrent = selected && selected.h === torrent.hash && selected.i === Number(select.value);
+      const button = text('button', isCurrent ? '▶ Play Video' : 'Watch now');
+      button.disabled = badStates.includes(torrent.state);
+      button.onclick = () => {
+        const file = torrent.files.find(f => f.index === Number(select.value));
+        prepare(torrent, file);
+      };
+      select.onchange = () => {
+        const match = selected && selected.h === torrent.hash && selected.i === Number(select.value);
+        button.textContent = match ? '▶ Play Video' : 'Watch now';
+      };
+      card.append(button);
+    } else card.append(text('p','Waiting for video metadata.'));
+    $('downloads').append(card);
+  }
+}
+async function refresh() {
+  if (refreshing) return;
+  refreshing = true;
+  clearTimeout(catalogTimer);
+  try {
+    let items;
+    if (route) {
+      const result = await api(`/api/resolve/${route[1]}/${route[2]}`);
+      items = result.downloads;
+      document.title = result.title + ' · NetFelix';
+      $('catalog-status').textContent = result.message;
+      $('library-title').hidden = !result.library_path;
+      if (result.library_path) $('library-title').href = serviceURL(8096, result.library_path);
+      renderNotice(result);
+      if (result.state === 'library' && autoStart && !selected) {
+        autoStart = false; location.replace(serviceURL(8096, result.library_path)); return;
+      }
+      if (result.state === 'download' && autoStart && !selected) {
+        const playable = items.filter(t => t.files.length && !badStates.includes(t.state));
+        const count = playable.reduce((n,t) => n + t.files.length, 0);
+        if ((route[1] === 'movie' || count === 1) && playable.length > 0) {
+          playable.sort((a,b) => b.progress - a.progress);
+          autoStart = false;
+          await prepare(playable[0], playable[0].files[0]);
+        } else if (!playable.length) {
+          $('catalog-status').textContent = 'Waiting for playable files…';
+        } else $('catalog-status').textContent = 'Choose the episode you want to watch below.';
+      }
+    } else items = await api('/api/downloads');
+    $('error').textContent = '';
+    renderDownloads(items);
+  } catch (error) { $('error').textContent = error.message; }
+  finally {
+    refreshing = false;
+    if (route) catalogTimer = setTimeout(refresh, 5000);
+  }
+}
+function renderNotice(result) {
+  const dates = result.dates || {};
+  const isMovie = route && route[1] === 'movie';
+  const arrPort = isMovie ? 7878 : 8989;
+  const arrName = isMovie ? 'Radarr' : 'Sonarr';
+  const arrPath = result.arr_id ? (isMovie ? '/movie/' : '/series/') + result.arr_id : '';
+  const arrURL = arrPath ? serviceURL(arrPort, arrPath) : null;
+  if (result.arabic_dub_missing && result.downloads && result.downloads.length) {
+    $('notice').className = 'notice-card warning';
+    $('notice').innerHTML = `
+      <div class="notice-header"><span class="notice-icon">⚠️</span><div><h3>Arabic Dub (دبلجة عربية) Not Available</h3><p class="notice-subtitle">Playing in original language — no Arabic-dubbed release found on indexers.</p></div></div>
+      <div class="notice-body">
+        <p>You requested <strong>${result.title}</strong> with <strong>Arabic Dubbing (مدبلج)</strong>, but our indexers only have the original version. The current download is playing in the original language (non-dubbed).</p>
+        <p class="notice-note">💡 Tip: Use the <strong>Subtitles</strong> bar below to select Arabic subtitles (.srt / .vtt), or upload an Arabic subtitle file.</p>
+      </div>`;
+    $('notice').hidden = false;
+  } else if (result.state === 'in_cinemas') {
+    $('notice').className = 'notice-card warning';
+    $('notice').innerHTML = `
+      <div class="notice-header"><span class="notice-icon">🎬</span><div><h3>In Theaters Only</h3><p class="notice-subtitle">No digital or Blu-ray release is available yet.</p></div></div>
+      <div class="notice-body">
+        <p><strong>${result.title}</strong> is currently playing in cinemas.</p>
+        <div class="date-badges">
+          ${dates.inCinemas ? `<span class="date-badge">Theatrical Release: ${dates.inCinemas}</span>` : ''}
+          ${dates.digitalRelease ? `<span class="date-badge highlight">Expected Digital Release: ${dates.digitalRelease}</span>` : ''}
+        </div>
+        <p class="notice-note">Only low-quality theater recordings (CAM/TELESYNC) exist right now on torrent sites. NetFelix automatically filters these out to preserve your 1080p quality profile.</p>
+        <p class="notice-note" style="color:#a7f3d0">${arrName} is monitoring this title and will automatically start downloading the full 1080p release as soon as the digital copy arrives!</p>
+      </div>
+      <div class="notice-actions">
+        <a href="${serviceURL(5055)}" class="button">← Search Other Titles in Jellyseerr</a>
+        ${arrURL ? `<a href="${arrURL}" target="_blank" class="button secondary">View in ${arrName}</a>` : ''}
+      </div>`;
+    $('notice').hidden = false;
+  } else if (result.state === 'not_found') {
+    $('notice').className = 'notice-card info';
+    const isDub = result.is_arabic_dub;
+    const headerTitle = isDub ? 'No Arabic Dubbed (مدبلج) Releases Found' : 'No Torrents Found on Indexers';
+    const subTitle = isDub ? 'No releases with Arabic audio or dubbing were found on indexers.' : 'No matching releases with seeders were found.';
+    const bodyText = isDub
+      ? `${arrName} searched your configured indexers specifically for an <strong>Arabic Dubbed (دبلجة عربية)</strong> release, but no matching release was found. You can perform a manual search in ${arrName} or request the original version in Jellyseerr.`
+      : `${arrName} searched your configured indexers, but no torrent matching your quality profile (HD-1080p) or minimum seeders was found.`;
+    $('notice').innerHTML = `
+      <div class="notice-header"><span class="notice-icon">${isDub ? '🎙️' : '🔍'}</span><div><h3>${headerTitle}</h3><p class="notice-subtitle">${subTitle}</p></div></div>
+      <div class="notice-body">
+        <p>${bodyText}</p>
+        <p class="notice-note">You can check your indexers in Prowlarr or perform an interactive search in ${arrName} to select a release manually.</p>
+      </div>
+      <div class="notice-actions">
+        <a href="${serviceURL(5055)}" class="button">← Search in Jellyseerr</a>
+        ${arrURL ? `<a href="${arrURL}" target="_blank" class="button secondary">Manual Search in ${arrName}</a>` : ''}
+        <a href="${serviceURL(9696)}" target="_blank" class="button secondary">Check Prowlarr</a>
+      </div>`;
+    $('notice').hidden = false;
+  } else if (result.state === 'announced') {
+    $('notice').className = 'notice-card info';
+    $('notice').innerHTML = `
+      <div class="notice-header"><span class="notice-icon">📅</span><div><h3>Not Yet Released</h3><p class="notice-subtitle">This title has not been released yet.</p></div></div>
+      <div class="notice-body">
+        <p><strong>${result.title}</strong> has not arrived in theaters or on digital platforms yet.</p>
+        <p class="notice-note" style="color:#a7f3d0">${arrName} is monitoring this title and will automatically start downloading once releases become available.</p>
+      </div>
+      <div class="notice-actions">
+        <a href="${serviceURL(5055)}" class="button">← Back to Jellyseerr</a>
+      </div>`;
+    $('notice').hidden = false;
+  } else {
+    $('notice').hidden = true;
+  }
+}
+let currentSubtitles = [], activeSubOffset = 0.0, userChosenSub = null;
+function closePlayer() {
+  generation++; clearTimeout(timer); selected = null; streamURL = '';
+  $('video').pause(); $('video').removeAttribute('src'); $('video').load();
+  $('video').replaceChildren();
+  $('player').hidden = true; $('play-container').hidden = true; $('sub-bar').hidden = true;
+  currentSubtitles = []; activeSubOffset = 0.0; userChosenSub = null;
+  $('sub-delay-val').textContent = '0.0s';
+}
+async function prepare(torrent, file) {
+  if (selected && selected.h === torrent.hash && selected.i === file.index && streamURL) {
+    $('player').hidden = false;
+    $('player').scrollIntoView({behavior:'smooth', block:'start'});
+    $('video').play().catch(() => { $('play-container').hidden = false; });
+    return;
+  }
+  closePlayer(); const token = generation;
+  selected = {h:torrent.hash, i:file.index}; autoStart = false;
+  $('player').hidden = false; $('video').hidden = true; $('vlc').hidden = true; $('copy').hidden = true;
+  $('play-container').hidden = true; $('sub-bar').hidden = true;
+  $('buffer').hidden = false; $('buffer').value = 0;
+  $('title').textContent = file.name.split('/').pop(); $('status').textContent = 'Preparing download for playback…';
+  requestAnimationFrame(() => $('player').scrollIntoView({behavior:'smooth', block:'start'}));
+  try {
+    await api(`/api/prepare/${torrent.hash}/${file.index}`, true);
+    if (token === generation) poll(token);
+  } catch (error) { if (token === generation) $('status').textContent = error.message; }
+}
+function updateSubtitles(subs) {
+  const video = $('video');
+  let changed = false;
+  for (const sub of subs) {
+    if (!sub.ready) continue;
+    if (!currentSubtitles.some(s => s.url === sub.url)) {
+      currentSubtitles.push(sub);
+      changed = true;
+      const track = document.createElement('track');
+      track.kind = 'subtitles';
+      track.src = sub.url;
+      track.label = sub.label;
+      track.srclang = sub.lang;
+      track.dataset.url = sub.url;
+      video.append(track);
+    }
+  }
+  if (changed) {
+    renderSubSelect();
+  }
+}
+function renderSubSelect() {
+  const select = $('sub-select');
+  const prev = select.value;
+  select.replaceChildren();
+  const offOpt = document.createElement('option');
+  offOpt.value = 'none';
+  offOpt.textContent = 'Off';
+  select.append(offOpt);
+  for (let i = 0; i < currentSubtitles.length; i++) {
+    const sub = currentSubtitles[i];
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = sub.label;
+    select.append(opt);
+  }
+  if (prev !== 'none' && select.querySelector(`option[value="${prev}"]`)) {
+    select.value = prev;
+  } else if (userChosenSub === 'none') {
+    select.value = 'none';
+  } else if (currentSubtitles.length > 0) {
+    select.value = '0';
+    activateSubTrack(0);
+  }
+}
+function activateSubTrack(index) {
+  const video = $('video');
+  for (let i = 0; i < video.textTracks.length; i++) {
+    const track = video.textTracks[i];
+    if (index !== null && i === Number(index)) {
+      track.mode = 'showing';
+    } else {
+      track.mode = 'disabled';
+    }
+  }
+  applyOffset(0);
+}
+function applyOffset(delta) {
+  activeSubOffset += delta;
+  $('sub-delay-val').textContent = (activeSubOffset >= 0 ? '+' : '') + activeSubOffset.toFixed(1) + 's';
+  const video = $('video');
+  for (let i = 0; i < video.textTracks.length; i++) {
+    const track = video.textTracks[i];
+    if (track.mode === 'showing' && track.cues) {
+      for (const cue of track.cues) {
+        cue.startTime += delta;
+        cue.endTime += delta;
+      }
+    }
+  }
+}
+$('sub-select').onchange = (e) => {
+  const val = e.target.value;
+  userChosenSub = val;
+  if (val === 'none') {
+    activateSubTrack(null);
+  } else {
+    activateSubTrack(Number(val));
+  }
+};
+$('sub-delay-minus').onclick = () => applyOffset(-0.5);
+$('sub-delay-plus').onclick = () => applyOffset(0.5);
+$('sub-delay-reset').onclick = () => applyOffset(-activeSubOffset);
+$('sub-upload-btn').onclick = () => $('sub-file-input').click();
+$('sub-file-input').onchange = (e) => {
+  if (e.target.files.length) loadCustomSubtitle(e.target.files[0]);
+};
+function parseSrtToVtt(text) {
+  const normalized = text.replace(/\r\n|\r/g, '\n');
+  const vtt = normalized.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2 --> $3.$4');
+  return 'WEBVTT\n\n' + vtt.trim();
+}
+function loadCustomSubtitle(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    let content = e.target.result;
+    if (file.name.toLowerCase().endsWith('.srt')) {
+      content = parseSrtToVtt(content);
+    }
+    const blob = new Blob([content], {type: 'text/vtt'});
+    const url = URL.createObjectURL(blob);
+    const sub = {
+      id: 'custom-' + Date.now(),
+      label: `Custom: ${file.name.replace(/\.[^.]+$/, '')}`,
+      lang: 'und',
+      url: url,
+      ready: true,
+      source: 'upload'
+    };
+    const video = $('video');
+    const track = document.createElement('track');
+    track.kind = 'subtitles';
+    track.src = url;
+    track.label = sub.label;
+    track.srclang = 'und';
+    video.append(track);
+    currentSubtitles.push(sub);
+    renderSubSelect();
+    $('sub-select').value = String(currentSubtitles.length - 1);
+    activateSubTrack(currentSubtitles.length - 1);
+  };
+  reader.readAsText(file);
+}
+['dragenter', 'dragover'].forEach(name => {
+  $('player').addEventListener(name, (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; });
+});
+$('player').addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    const file = e.dataTransfer.files[0];
+    if (/\.(srt|vtt)$/i.test(file.name)) {
+      loadCustomSubtitle(file);
+    }
+  }
+});
+async function poll(token) {
+  if (token !== generation || !selected) return;
+  try {
+    const {h,i} = selected;
+    const data = await api(`/api/status/${h}/${i}`);
+    if (token !== generation) return;
+    $('buffer').value = Math.min(1, data.buffer_bytes / data.target_bytes);
+    $('status').textContent = data.ready
+      ? `Ready · ${(data.progress * 100).toFixed(1)}% downloaded · ${mb(data.speed)}/s`
+      : `Buffering ${mb(Math.min(data.buffer_bytes,data.target_bytes))} / ${mb(data.target_bytes)} · ${data.tail_ready ? 'video ending ready' : 'waiting for video ending'} · ${mb(data.speed)}/s · ${data.state}${data.on_disk ? '' : ' · waiting for file on disk'}`;
+    if (data.ready) {
+      $('sub-bar').hidden = false;
+      updateSubtitles(data.subtitles || []);
+    }
+    if (data.ready && $('video').hidden) {
+      streamURL = new URL(`/stream/${h}/${i}`, location.href).href;
+      $('video').src = streamURL; $('video').hidden = false; $('buffer').hidden = true;
+      $('vlc').href = `/playlist/${h}/${i}`; $('vlc').hidden = false; $('copy').hidden = false;
+      $('video').play().then(() => {
+        $('play-container').hidden = true;
+      }).catch(() => {
+        $('status').textContent = 'Video is ready! Press Play below to start watching:';
+        $('play-container').hidden = false;
+      });
+    }
+  } catch (error) { if (token !== generation) return; $('status').textContent = error.message; }
+  timer = setTimeout(() => poll(token), 2500);
+}
+$('big-play').onclick = () => {
+  $('video').play().catch(() => {});
+  $('play-container').hidden = true;
+};
+$('video').addEventListener('play', () => {
+  $('play-container').hidden = true;
+});
+$('video').addEventListener('error', () => {
+  $('status').textContent = 'The browser could not play this video, or buffering timed out. Open the playlist in VLC, or wait for more data and click Watch now again.';
+});
+$('copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(streamURL); $('status').textContent = 'Stream URL copied. Paste it into VLC → Open Network Stream.'; }
+  catch { window.prompt('Copy this URL into VLC → Open Network Stream:', streamURL); }
+};
+$('stop').onclick = () => {autoStart = false; closePlayer();};
+$('refresh').onclick = refresh;
+refresh();
 </script></body></html>
