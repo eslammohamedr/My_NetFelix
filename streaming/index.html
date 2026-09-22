@@ -33,7 +33,7 @@
 const $ = id => document.getElementById(id);
 const route = location.pathname.match(/^\/watch\/(movie|tv)\/(\d+)$/);
 let selected = null, generation = 0, timer = null, catalogTimer = null, streamURL = '';
-let autoStart = true, refreshing = false;
+let autoStart = true, refreshing = false, arabicAssetMissing = false;
 const badStates = ['missingFiles','error','moving','checkingDL','checkingUP','checkingResumeData'];
 const mb = n => (n / 1048576).toFixed(1) + ' MB';
 function serviceURL(port, path = '/') {
@@ -104,13 +104,14 @@ async function refresh() {
       items = result.downloads;
       document.title = result.title + ' · NetFelix';
       $('catalog-status').textContent = result.message;
+      arabicAssetMissing = Boolean(result.arabic_dub_missing);
       $('library-title').hidden = !result.library_path;
       if (result.library_path) $('library-title').href = serviceURL(8096, result.library_path);
       renderNotice(result);
       if (result.state === 'library' && autoStart && !selected) {
         autoStart = false; location.replace(serviceURL(8096, result.library_path)); return;
       }
-      if (result.state === 'download' && autoStart && !selected) {
+      if (result.state === 'download' && autoStart && !selected && !result.arabic_dub_missing) {
         const playable = items.filter(t => t.files.length && !badStates.includes(t.state));
         const count = playable.reduce((n,t) => n + t.files.length, 0);
         if ((route[1] === 'movie' || count === 1) && playable.length > 0) {
@@ -142,8 +143,8 @@ function renderNotice(result) {
     $('notice').innerHTML = `
       <div class="notice-header"><span class="notice-icon">⚠️</span><div><h3>Arabic Dub (دبلجة عربية) Not Available</h3><p class="notice-subtitle">Playing in original language — no Arabic-dubbed release found on indexers.</p></div></div>
       <div class="notice-body">
-        <p>You requested <strong>${result.title}</strong> with <strong>Arabic Dubbing (مدبلج)</strong>, but our indexers only have the original version. The current download is playing in the original language (non-dubbed).</p>
-        <p class="notice-note">💡 Tip: Use the <strong>Subtitles</strong> bar below to select Arabic subtitles (.srt / .vtt), or upload an Arabic subtitle file.</p>
+        <p>You requested <strong>${result.title}</strong> with <strong>Arabic Dubbing (مدبلج)</strong>, but our indexers only have the original version. Choose <strong>Watch now</strong> below if you want to play that original version.</p>
+        <p class="notice-note">Playback is paused until you choose an episode. If Arabic subtitles are available, they will appear in the Subtitles bar; you can also upload an Arabic .srt/.vtt file.</p>
       </div>`;
     $('notice').hidden = false;
   } else if (result.state === 'in_cinemas') {
@@ -376,15 +377,23 @@ async function poll(token) {
     if (data.ready) {
       $('sub-bar').hidden = false;
       updateSubtitles(data.subtitles || []);
+      const hasArabic = (data.subtitles || []).some(s => s.ready && s.lang === 'ar');
+      const missingArabic = data.subtitle_missing_languages?.includes('ar') || (arabicAssetMissing && !hasArabic);
+      if (missingArabic) {
+        $('status').textContent = 'Ready, but Arabic audio/subtitles were not found. Press Play to watch the original version.';
+        $('play-container').hidden = false;
+        $('big-play').textContent = '▶ Play original anyway';
+      }
     }
     if (data.ready && $('video').hidden) {
       streamURL = new URL(`/stream/${h}/${i}`, location.href).href;
       $('video').src = streamURL; $('video').hidden = false; $('buffer').hidden = true;
       $('vlc').href = `/playlist/${h}/${i}`; $('vlc').hidden = false; $('copy').hidden = false;
-      $('video').play().then(() => {
+      const needsChoice = arabicAssetMissing || data.subtitle_missing_languages?.includes('ar');
+      (needsChoice ? Promise.reject() : $('video').play()).then(() => {
         $('play-container').hidden = true;
       }).catch(() => {
-        $('status').textContent = 'Video is ready! Press Play below to start watching:';
+        if (!needsChoice) $('status').textContent = 'Video is ready! Press Play below to start watching:';
         $('play-container').hidden = false;
       });
     }

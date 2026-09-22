@@ -268,32 +268,78 @@ def get_subtitles(h, torrent, properties):
     # 2. Subtitles from Bazarr / media library
     if BAZARR_API_KEY:
         try:
-            req = request.Request(f"{BAZARR_URL}/api/movies", headers={'X-Api-Key': BAZARR_API_KEY})
-            with request.urlopen(req, timeout=3) as resp:
-                data = json.load(resp).get('data', [])
+            headers = {'X-Api-Key': BAZARR_API_KEY}
+            def bazarr_get(path):
+                req = request.Request(f"{BAZARR_URL}{path}", headers=headers)
+                with request.urlopen(req, timeout=3) as resp:
+                    return json.load(resp).get('data', [])
+
             torrent_name = torrent.get('name', '').lower()
-            for movie in data:
+            movies = bazarr_get('/api/movies')
+            for movie in movies:
                 title = movie.get('title', '').lower()
                 scene = (movie.get('sceneName') or '').lower()
                 if (title and title in torrent_name) or (scene and scene in torrent_name):
-                    for b_sub in movie.get('subtitles', []):
-                        sub_id = b_sub.get('id')
-                        if sub_id:
-                            sub_name = b_sub.get('name', 'Unknown')
-                            if b_sub.get('hi'):
-                                sub_name += ' [SDH]'
-                            subtitles.append({
-                                'id': f"bazarr-{sub_id}",
-                                'label': f"{sub_name} (Bazarr)",
-                                'lang': b_sub.get('code2', 'en'),
-                                'url': f"/subtitles/bazarr/{sub_id}.vtt",
-                                'ready': True,
-                                'source': 'bazarr'
-                            })
+                    subtitles.extend(format_bazarr_subtitles(movie.get('subtitles', [])))
                     break
+
+            # Bazarr exposes TV subtitles per episode, so identify the matching
+            # series first and then query its episode list with the required
+            # array-style seriesid[] parameter.
+            for series in bazarr_get('/api/series'):
+                title = (series.get('title') or '').lower()
+                scene = (series.get('sceneName') or '').lower()
+                if not ((title and title in torrent_name) or (scene and scene in torrent_name)):
+                    continue
+                series_id = series.get('sonarrSeriesId') or series.get('id')
+                if not series_id:
+                    continue
+                episodes = bazarr_get('/api/episodes?' + parse.urlencode({'seriesid[]': series_id}))
+                matched_episode = False
+                for episode in episodes:
+                    episode_path = (episode.get('path') or '').lower()
+                    episode_name = Path(episode_path).name
+                    episode_stem = Path(episode_name).stem
+                    if episode_path and episode_path not in torrent_name and episode_name not in torrent_name and episode_stem not in torrent_name:
+                        continue
+                    matched_episode = True
+                    subtitles.extend(format_bazarr_subtitles(episode.get('subtitles', [])))
+                    missing = {s.get('code2') for s in episode.get('missing_subtitles', []) if s.get('code2')}
+                    for lang in sorted(missing):
+                        if not any(s.get('missing') and s.get('lang') == lang for s in subtitles):
+                            name = LANG_CODES.get(lang, (lang.upper(), lang))[0]
+                            subtitles.append({'id': f'bazarr-missing-{lang}', 'label': f'{name} (Bazarr: not found)',
+                                              'lang': lang, 'ready': False, 'missing': True, 'source': 'bazarr'})
+                    break
+                if not matched_episode:
+                    # Season-pack torrents usually have only the pack name in
+                    # qBittorrent, so report Bazarr's missing-language state
+                    # across the series even when no single episode filename
+                    # can be matched.
+                    missing = {s.get('code2') for episode in episodes for s in episode.get('missing_subtitles', []) if s.get('code2')}
+                    for lang in sorted(missing):
+                        name = LANG_CODES.get(lang, (lang.upper(), lang))[0]
+                        subtitles.append({'id': f'bazarr-missing-{lang}', 'label': f'{name} (Bazarr: not found)',
+                                          'lang': lang, 'ready': False, 'missing': True, 'source': 'bazarr'})
+                break
         except Exception:
             logging.debug('Could not query Bazarr for subtitles', exc_info=True)
     return subtitles
+
+
+def format_bazarr_subtitles(items):
+    result = []
+    for b_sub in items:
+        sub_id = b_sub.get('id')
+        if not sub_id:
+            continue
+        sub_name = b_sub.get('name', 'Unknown')
+        if b_sub.get('hi'):
+            sub_name += ' [SDH]'
+        result.append({'id': f"bazarr-{sub_id}", 'label': f"{sub_name} (Bazarr)",
+                       'lang': b_sub.get('code2', 'en'), 'url': f"/subtitles/bazarr/{sub_id}.vtt",
+                       'ready': True, 'source': 'bazarr'})
+    return result
 
 
 def readiness(h, index):
@@ -308,11 +354,13 @@ def readiness(h, index):
         on_disk = True
     except Problem:
         on_disk = False
+    subtitles = get_subtitles(h, torrent, properties)
+    missing_languages = sorted({s['lang'] for s in subtitles if s.get('missing')})
     return {'ready': available >= target and tail_ready and on_disk,
             'buffer_bytes': available, 'target_bytes': target, 'tail_ready': tail_ready,
             'progress': file['progress'], 'speed': torrent.get('dlspeed', 0),
             'state': torrent['state'], 'on_disk': on_disk,
-            'subtitles': get_subtitles(h, torrent, properties)}
+            'subtitles': subtitles, 'subtitle_missing_languages': missing_languages}
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -394,17 +442,33 @@ class Handler(BaseHTTPRequestHandler):
                 sub_id = int(sub_bazarr_match.group(1))
                 if not BAZARR_API_KEY:
                     raise Problem('Bazarr is not configured.', 503)
-                req = request.Request(f"{BAZARR_URL}/api/movies", headers={'X-Api-Key': BAZARR_API_KEY})
-                with request.urlopen(req, timeout=5) as resp:
-                    movies = json.load(resp).get('data', [])
                 target_sub = None
-                for m in movies:
+                api_headers = {'X-Api-Key': BAZARR_API_KEY}
+                def bazarr_data(path):
+                    req = request.Request(f"{BAZARR_URL}{path}", headers=api_headers)
+                    with request.urlopen(req, timeout=5) as resp:
+                        return json.load(resp).get('data', [])
+                for m in bazarr_data('/api/movies'):
                     for s_item in m.get('subtitles', []):
                         if s_item.get('id') == sub_id:
                             target_sub = s_item
                             break
                     if target_sub:
                         break
+                if not target_sub:
+                    for series in bazarr_data('/api/series'):
+                        series_id = series.get('sonarrSeriesId') or series.get('id')
+                        if not series_id:
+                            continue
+                        for episode in bazarr_data('/api/episodes?' + parse.urlencode({'seriesid[]': series_id})):
+                            for s_item in episode.get('subtitles', []):
+                                if s_item.get('id') == sub_id:
+                                    target_sub = s_item
+                                    break
+                            if target_sub:
+                                break
+                        if target_sub:
+                            break
                 if not target_sub or not target_sub.get('path'):
                     raise Problem('Subtitle not found in Bazarr.', 404)
                 sub_path_str = target_sub['path']
