@@ -1,4 +1,35 @@
 services:
+  watch-now:
+    build: ./streaming
+    container_name: netfelix-watch-now
+    restart: unless-stopped
+    # Linux host networking reaches qBittorrent through its existing localhost access.
+    network_mode: host
+    user: "${PUID}:${PGID}"
+    environment:
+      QBT_URL: http://127.0.0.1:8080
+      QBT_USERNAME: ${QBT_USERNAME:-}
+      QBT_PASSWORD: ${QBT_PASSWORD:-}
+      TORRENT_ROOT: /data/torrents
+      PORT: "8090"
+    volumes:
+      - type: bind
+        source: ${MEDIA_ROOT}/torrents
+        target: /data/torrents
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8090/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      - qbittorrent
+
   homepage:
     image: ghcr.io/gethomepage/homepage:latest
     container_name: netfelix-homepage

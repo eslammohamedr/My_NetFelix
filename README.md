@@ -9,6 +9,7 @@ An automated, self-hosted streaming and media management stack tailored for loca
 | Service | Local URL | Description |
 | :--- | :--- | :--- |
 | **Homepage** | [http://192.168.1.15:3000](http://192.168.1.15:3000) | Single dashboard linking all services |
+| **Watch Now** | [http://192.168.1.15:8090](http://192.168.1.15:8090) | Play videos while qBittorrent downloads them |
 | **Jellyseerr** | [http://192.168.1.15:5055](http://192.168.1.15:5055) | Search & request movies and TV series |
 | **Jellyfin** | [http://192.168.1.15:8096](http://192.168.1.15:8096) | Media server & video player |
 | **Radarr** | [http://192.168.1.15:7878](http://192.168.1.15:7878) | Movie management & quality automation |
@@ -142,3 +143,26 @@ Live service configuration, databases, credentials, and downloaded media are exc
 - In Jellyseerr Settings:
   - Connect **Radarr**: Server `http://radarr:7878`, paste API Key, select Root folder `/data/media/movies` and quality profile.
   - Connect **Sonarr**: Server `http://sonarr:8989`, paste API Key, select Root folder `/data/media/tv` and quality profile.
+
+## Watch while downloading
+
+1. Request a movie or show in Jellyseerr as usual. Once qBittorrent has its metadata, open **Watch Now** at `http://YOUR_SERVER_IP:8090` (also linked from the local Homepage).
+2. Select the movie or episode and click **Watch now**. This enables sequential downloading, first/last-piece priority, and high priority for the selected file. It also resumes the selected torrent; other downloads are not stopped.
+3. Playback begins once the first 16 MiB and the file's final piece are verified and the file exists on disk. The rest continues downloading through qBittorrent. The page reports buffer size, download speed, and download state.
+4. If the browser cannot play the codecs/container, choose **Open playlist in VLC**, or copy the stream URL into VLC's **Open Network Stream**. Completed downloads still follow the existing Radarr/Sonarr → Jellyfin import workflow.
+
+The service checks downloaded pieces before sending bytes, including HTTP byte-range requests. It never treats preallocated file size as proof that video data has downloaded. If playback catches up to the download, it waits; a request times out after 120 seconds without usable data. Retry playback after more data downloads. Seeking ahead does not reprioritize individual pieces and may take a while. Download speed and available peers still determine whether playback can remain smooth.
+
+This first version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; no transcoding or automatic subtitle integration is provided on Watch Now. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
+
+### Running and troubleshooting
+
+- `./netfelix.sh start` builds Watch Now and starts the stack. This setup uses Linux host networking to reach qBittorrent at `127.0.0.1:8080` and listens on port `8090`.
+- The script finds the drive using `/dev/disk/by-label/Data`, mounts it if necessary, and uses its actual mount point, including `Data1`. It refuses to start when that drive or its `netfelix_data/torrents` folder is missing. Override the device when needed: `MEDIA_DEVICE=/dev/disk/by-uuid/YOUR_UUID ./netfelix.sh start`.
+- For direct `docker compose` commands, mount the drive first and set `.env`'s `MEDIA_ROOT` to its real `netfelix_data` path. Existing containers must be recreated after changing bind-mount paths.
+- The current qBittorrent installation already permits localhost access. On a fresh installation that requires login, set `QBT_USERNAME` and `QBT_PASSWORD` in your ignored `.env`; restart Watch Now. Do not commit these credentials.
+- Watch Now mounts torrent data read-only. Its API only prepares existing video downloads; add titles through Jellyseerr/qBittorrent.
+- Inspect logs with `docker compose logs --tail=100 watch-now`.
+- Run the verification suite with `python3 -m unittest discover -s streaming/tests -v`.
+
+API behavior follows the [official qBittorrent Web API documentation](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-%28qBittorrent-5.0%29).

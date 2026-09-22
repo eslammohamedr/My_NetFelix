@@ -17,12 +17,22 @@ fi
 
 # Ensure Data drive is mounted
 ensure_mounted() {
-    if ! mountpoint -q /media/dell/Data; then
-        echo ">> Media drive /media/dell/Data is not mounted. Attempting to mount /dev/sdb1..."
-        if command -v udisksctl >/dev/null 2>&1; then
-            udisksctl mount -b /dev/sdb1 || echo "Warning: failed to mount /dev/sdb1 automatically."
-        fi
+    local media_device="${MEDIA_DEVICE:-/dev/disk/by-label/Data}"
+    local mounted_at
+    if [ ! -b "$media_device" ]; then
+        echo "Media drive not found: $media_device. Connect it before starting."
+        return 1
     fi
+    mounted_at="$(findmnt -rn -S "$media_device" -o TARGET || true)"
+    if [ -z "$mounted_at" ]; then
+        udisksctl mount -b "$media_device" || return 1
+        mounted_at="$(findmnt -rn -S "$media_device" -o TARGET || true)"
+    fi
+    if [ -z "$mounted_at" ] || [ ! -d "$mounted_at/netfelix_data/torrents" ]; then
+        echo "The media drive is not ready or netfelix_data/torrents is missing."
+        return 1
+    fi
+    export MEDIA_ROOT="$mounted_at/netfelix_data"
 }
 
 detect_ip() {
@@ -39,6 +49,7 @@ print_urls() {
     printf "  %-18s %-32s %s\n" "SERVICE" "LOCAL URL" "WHAT IT DOES"
     echo "  -----------------------------------------------------------------------"
     printf "  %-18s %-32s %s\n" "Homepage" "http://${host_ip}:3000" "Unified Dashboard"
+    printf "  %-18s %-32s %s\n" "Watch Now" "http://${host_ip}:8090" "Play While Downloading"
     printf "  %-18s %-32s %s\n" "Jellyseerr" "http://${host_ip}:5055" "Search & Request Movies / Shows"
     printf "  %-18s %-32s %s\n" "Jellyfin" "http://${host_ip}:8096" "Watch & Stream Media Player"
     printf "  %-18s %-32s %s\n" "Radarr" "http://${host_ip}:7878" "Movie Library Manager"
@@ -54,7 +65,7 @@ case "${1:-start}" in
     start|up)
         ensure_mounted
         echo ">> Starting My NetFelix stack..."
-        docker compose up -d
+        docker compose up -d --build
         print_urls
         ;;
     stop|down)
@@ -64,7 +75,7 @@ case "${1:-start}" in
     restart)
         ensure_mounted
         echo ">> Restarting My NetFelix stack..."
-        docker compose restart
+        docker compose up -d --build --force-recreate
         print_urls
         ;;
     status|ps)
@@ -76,10 +87,11 @@ case "${1:-start}" in
         docker compose logs -f "$@"
         ;;
     update|pull)
+        ensure_mounted
         echo ">> Pulling latest images..."
         docker compose pull
         echo ">> Recreating containers..."
-        docker compose up -d
+        docker compose up -d --build
         print_urls
         ;;
     *)
