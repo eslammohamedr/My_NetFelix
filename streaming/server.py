@@ -404,7 +404,9 @@ class Handler(BaseHTTPRequestHandler):
                     self.close_connection = True
                     raise Problem('Request body is not supported.', 400)
             if path == '/' and not mutate:
-                self.reply(302, b'', extra={'Location': '/search'})
+                self.reply(200, Path(__file__).with_name('dashboard.html').read_bytes(), 'text/html; charset=utf-8')
+            elif path == '/dashboard' and not mutate:
+                self.reply(200, Path(__file__).with_name('dashboard.html').read_bytes(), 'text/html; charset=utf-8')
             elif path == '/search' and not mutate:
                 self.reply(200, Path(__file__).with_name('search.html').read_bytes(), 'text/html; charset=utf-8')
             elif path == '/manifest.json' and not mutate:

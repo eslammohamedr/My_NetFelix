@@ -181,6 +181,12 @@ class HTTPIntegration(unittest.TestCase):
         self.assertIn('manifest+json', headers['Content-Type'])
         self.assertIn(b'NetFelix Watch Now', body)
 
+    def test_dashboard_is_available_at_root(self):
+        status, headers, body = self.request('/')
+        self.assertEqual(status, 200)
+        self.assertIn('text/html', headers['Content-Type'])
+        self.assertIn(b'My NetFelix', body)
+
     def test_subtitles_in_readiness(self):
         ready = s.readiness(HASH, 1)
         self.assertIn('subtitles', ready)

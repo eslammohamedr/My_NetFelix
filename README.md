@@ -9,7 +9,8 @@ An automated, self-hosted streaming and media management stack tailored for loca
 | Service | Local URL | Description |
 | :--- | :--- | :--- |
 | **Homepage** | [http://192.168.1.15:3000](http://192.168.1.15:3000) | Single dashboard linking all services |
-| **Watch Now** | [http://192.168.1.15:8090](http://192.168.1.15:8090) | Play videos while qBittorrent downloads them |
+| **NetFelix Dashboard** | [http://192.168.1.15:8090](http://192.168.1.15:8090) | Combined links for search, playback, and management |
+| **Watch Now** | [http://192.168.1.15:8090/downloads](http://192.168.1.15:8090/downloads) | Play videos while qBittorrent downloads them |
 | **Jellyseerr** | [http://192.168.1.15:5055](http://192.168.1.15:5055) | Search & request movies and TV series |
 | **Jellyfin** | [http://192.168.1.15:8096](http://192.168.1.15:8096) | Media server & video player |
 | **Radarr** | [http://192.168.1.15:7878](http://192.168.1.15:7878) | Movie management & quality automation |

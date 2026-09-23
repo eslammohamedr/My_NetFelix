@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#e4314e"><title>NetFelix Dashboard</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,-apple-system,sans-serif;background:#0f1015;color:#f5f5f7}body{max-width:1100px;margin:auto;padding:28px 20px}header{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap}h1{margin:0;font-size:2rem}h1 span{color:#ff4968}p{color:#b8bac7;line-height:1.5}.hero{background:linear-gradient(130deg,#252033,#401c2d);border:1px solid #4d2c49;border-radius:18px;padding:28px;margin:22px 0}.actions,.grid{display:flex;gap:12px;flex-wrap:wrap}.button{display:inline-block;background:#e4314e;color:#fff;text-decoration:none;border-radius:9px;padding:11px 16px;font-weight:600}.secondary{background:#34384c}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin-top:20px}.card{background:#1b1d26;border:1px solid #30323f;border-radius:13px;padding:18px;min-height:120px;display:flex;flex-direction:column}.card h2{font-size:1.05rem;margin:0 0 7px}.card p{font-size:.9rem;margin:0 0 15px}.card a{margin-top:auto}.status{font-size:.8rem;color:#86efac}.footer{margin-top:28px;font-size:.85rem}@media(max-width:600px){body{padding:18px 14px}h1{font-size:1.6rem}.hero{padding:20px}}
+</style></head>
+<body>
+<header><div><h1>My NetFelix <span>Dashboard</span></h1><p>Search, request, watch, and manage your home media from one page.</p></div><a class="button secondary" href="/health">System health</a></header>
+<section class="hero"><h2>Start here</h2><p>Search Jellyseerr first. Use Watch Now for downloads that are still in progress, and Jellyfin for your completed library.</p><div class="actions"><a class="button" href="http://192.168.1.15:5055">🔎 Search & request</a><a class="button secondary" href="/downloads">▶ Watch Now</a><a class="button secondary" href="http://192.168.1.15:8096">🎬 Open Jellyfin</a></div></section>
+<h2>Media services</h2><section class="grid">
+<article class="card"><h2>Jellyseerr</h2><p>Search movies and series, request seasons, and choose Watch now.</p><a class="button" href="http://192.168.1.15:5055">Open Jellyseerr</a></article>
+<article class="card"><h2>Jellyfin</h2><p>Completed library, profiles, playback, and collections.</p><a class="button secondary" href="http://192.168.1.15:8096">Open Jellyfin</a></article>
+<article class="card"><h2>Watch Now</h2><p>Play verified video pieces while the download continues.</p><a class="button secondary" href="/downloads">Open Watch Now</a></article>
+</section>
+<h2>Management</h2><section class="grid">
+<article class="card"><h2>Sonarr</h2><p>TV series, seasons, quality profiles, and missing episodes.</p><a class="button secondary" href="http://192.168.1.15:8989">Open Sonarr</a></article>
+<article class="card"><h2>Radarr</h2><p>Movies, quality profiles, and automatic imports.</p><a class="button secondary" href="http://192.168.1.15:7878">Open Radarr</a></article>
+<article class="card"><h2>Bazarr</h2><p>Arabic and other subtitle searches after import.</p><a class="button secondary" href="http://192.168.1.15:6767">Open Bazarr</a></article>
+<article class="card"><h2>Prowlarr</h2><p>Indexer health, search sources, and app synchronization.</p><a class="button secondary" href="http://192.168.1.15:9696">Open Prowlarr</a></article>
+<article class="card"><h2>qBittorrent</h2><p>Download progress, seeders, speed, and active jobs.</p><a class="button secondary" href="http://192.168.1.15:8080">Open qBittorrent</a></article>
+</section>
+<p class="footer">Keep this dashboard on your trusted LAN. The Watch Now service is intentionally not exposed with a separate login.</p>
+</body></html>
