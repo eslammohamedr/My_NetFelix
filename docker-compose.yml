@@ -173,6 +173,22 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
+  health-monitor:
+    image: python:3.12-slim
+    container_name: netfelix-health-monitor
+    restart: unless-stopped
+    network_mode: host
+    working_dir: /app
+    command: ["sh", "-c", "while true; do python scripts/healthcheck.py || true; sleep 300; done"]
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+        read_only: true
+    environment:
+      CONFIG_ROOT: /app/config
+      NETFELIX_NOTIFY_URL: ${NETFELIX_NOTIFY_URL:-}
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: netfelix-flaresolverr
