@@ -12,6 +12,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib import error, parse, request
 from catalog import CatalogError, resolve
+from sources import internet_archive_search
 
 QBT_URL = os.getenv('QBT_URL', 'http://127.0.0.1:8080').rstrip('/')
 ROOT = Path(os.getenv('TORRENT_ROOT', '/data/torrents')).resolve()
@@ -406,6 +407,10 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(302, b'', extra={'Location': '/search'})
             elif path == '/search' and not mutate:
                 self.reply(200, Path(__file__).with_name('search.html').read_bytes(), 'text/html; charset=utf-8')
+            elif path == '/manifest.json' and not mutate:
+                self.reply(200, Path(__file__).with_name('manifest.json').read_bytes(), 'application/manifest+json')
+            elif path == '/sw.js' and not mutate:
+                self.reply(200, Path(__file__).with_name('sw.js').read_bytes(), 'application/javascript')
             elif (path == '/downloads' or re.fullmatch(r'/watch/(movie|tv)/[1-9][0-9]*', path)) and not mutate:
                 self.reply(200, Path(__file__).with_name('index.html').read_bytes(), 'text/html; charset=utf-8')
             elif re.fullmatch(r'/api/resolve/(movie|tv)/[1-9][0-9]*', path) and not mutate:
@@ -413,6 +418,11 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, resolve(media_type, int(tmdb_id), qbt))
             elif path == '/health' and not mutate:
                 self.reply(200, {'status': 'ok'})
+            elif path == '/api/sources/internet-archive' and not mutate:
+                query = parse.parse_qs(parse.urlsplit(self.path).query).get('q', [''])[0].strip()
+                if not query or len(query) > 160:
+                    raise Problem('Provide a search query between 1 and 160 characters.', 400)
+                self.reply(200, {'source': 'Internet Archive', 'results': internet_archive_search(query)})
             elif path == '/api/downloads' and not mutate:
                 result = []
                 for t in qbt.call('torrents/info'):

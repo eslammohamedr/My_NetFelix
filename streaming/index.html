@@ -23,7 +23,7 @@
 .sub-sync-btn{padding:5px 9px;font-size:.85rem}
 .sub-sync-val{font-size:.85rem;min-width:3.4em;text-align:center;color:#60a5fa;font-variant-numeric:tabular-nums}
 </style></head><body>
-<header><div><h1>NetFelix <span style="color:#ff4968">Watch Now</span></h1><p>Start watching while your download continues.</p></div><button id="refresh" class="secondary">Refresh</button></header>
+<header><div><h1>NetFelix <span style="color:#ff4968">Watch Now</span></h1><p>Start watching while your download continues.</p></div><div class="actions"><button id="install" class="secondary" hidden>Install app</button><button id="refresh" class="secondary">Refresh</button></div></header>
 <p>Request a movie or episode in <a id="requests">Jellyseerr</a>, then select its download below. Finished titles remain available in <a id="library">Jellyfin</a>.</p>
 <p id="catalog-status" role="status"></p><p><a id="back" hidden>Back to Jellyseerr</a> <a id="library-title" hidden>Play in Jellyfin</a></p><p id="error" role="alert"></p>
 <div id="notice" hidden></div>
@@ -32,8 +32,9 @@
 <script>
 const $ = id => document.getElementById(id);
 const route = location.pathname.match(/^\/watch\/(movie|tv)\/(\d+)$/);
-let selected = null, generation = 0, timer = null, catalogTimer = null, streamURL = '';
+let selected = null, generation = 0, timer = null, catalogTimer = null, streamURL = '', deferredInstall = null;
 let autoStart = true, refreshing = false, arabicAssetMissing = false;
+let speedHistory = [];
 const badStates = ['missingFiles','error','moving','checkingDL','checkingUP','checkingResumeData'];
 const mb = n => (n / 1048576).toFixed(1) + ' MB';
 function serviceURL(port, path = '/') {
@@ -371,6 +372,8 @@ async function poll(token) {
     const data = await api(`/api/status/${h}/${i}`);
     if (token !== generation) return;
     $('buffer').value = Math.min(1, data.buffer_bytes / data.target_bytes);
+    speedHistory.push({at: Date.now(), speed: data.speed || 0});
+    speedHistory = speedHistory.slice(-12);
     $('status').textContent = data.ready
       ? `Ready · ${(data.progress * 100).toFixed(1)}% downloaded · ${mb(data.speed)}/s`
       : `Buffering ${mb(Math.min(data.buffer_bytes,data.target_bytes))} / ${mb(data.target_bytes)} · ${data.tail_ready ? 'video ending ready' : 'waiting for video ending'} · ${mb(data.speed)}/s · ${data.state}${data.on_disk ? '' : ' · waiting for file on disk'}`;
@@ -396,6 +399,7 @@ async function poll(token) {
         if (!needsChoice) $('status').textContent = 'Video is ready! Press Play below to start watching:';
         $('play-container').hidden = false;
       });
+      if ('Notification' in window && Notification.permission === 'granted') new Notification('NetFelix is ready', {body: 'Your video has enough data to start playing.'});
     }
   } catch (error) { if (token !== generation) return; $('status').textContent = error.message; }
   timer = setTimeout(() => poll(token), 2500);
@@ -417,4 +421,8 @@ $('copy').onclick = async () => {
 $('stop').onclick = () => {autoStart = false; closePlayer();};
 $('refresh').onclick = refresh;
 refresh();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+window.addEventListener('beforeinstallprompt', event => { event.preventDefault(); deferredInstall = event; $('install').hidden = false; });
+$('install').onclick = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; $('install').hidden = true; };
+if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
 </script></body></html>

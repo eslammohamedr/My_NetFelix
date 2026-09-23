@@ -1,0 +1,10 @@
+{
+  "name": "NetFelix Watch Now",
+  "short_name": "NetFelix",
+  "start_url": "/search",
+  "display": "standalone",
+  "background_color": "#101116",
+  "theme_color": "#e4314e",
+  "description": "Watch NetFelix downloads while they are still completing.",
+  "icons": []
+}

@@ -175,6 +175,12 @@ class HTTPIntegration(unittest.TestCase):
         self.assertIn(b'00:00:01.000 --> 00:00:03.000', body)
         self.assertIn(b'Hello world', body)
 
+    def test_pwa_manifest_is_available(self):
+        status, headers, body = self.request('/manifest.json')
+        self.assertEqual(status, 200)
+        self.assertIn('manifest+json', headers['Content-Type'])
+        self.assertIn(b'NetFelix Watch Now', body)
+
     def test_subtitles_in_readiness(self):
         ready = s.readiness(HASH, 1)
         self.assertIn('subtitles', ready)
