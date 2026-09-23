@@ -94,8 +94,14 @@ case "${1:-start}" in
         docker compose up -d --build
         print_urls
         ;;
+    backup)
+        BACKUP_ROOT="${BACKUP_ROOT:-$SCRIPT_DIR/backups}" ./backup.sh
+        ;;
+    health)
+        python3 scripts/healthcheck.py
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs [service]|update}"
+        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health}"
         exit 1
         ;;
 esac

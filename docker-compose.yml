@@ -158,6 +158,21 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
+  sabnzbd:
+    image: lscr.io/linuxserver/sabnzbd:latest
+    container_name: netfelix-sabnzbd
+    profiles: [usenet]
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    volumes:
+      - ${CONFIG_ROOT}/sabnzbd:/config
+      - ${MEDIA_ROOT}:/data
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+
   flaresolverr:
     image: ghcr.io/flaresolverr/flaresolverr:latest
     container_name: netfelix-flaresolverr

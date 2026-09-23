@@ -77,6 +77,8 @@ Live service configuration, databases, credentials, and downloaded media are exc
 - Restart: `./netfelix.sh restart`
 - Stop: `./netfelix.sh stop`
 - Update containers: `./netfelix.sh update`
+- Check all local service endpoints: `./netfelix.sh health`
+- Back up service configuration and databases: `./netfelix.sh backup`
 
 ---
 
@@ -165,6 +167,18 @@ Watch Now distinguishes Arabic dubbing from subtitles. When an Arabic-dub reques
 Jellyfin is configured for VA-API using `/dev/dri/renderD128`. Keep hardware decoding limited to codecs supported by the machine, and verify a real transcode in the Jellyfin dashboard after changing client quality. Intro/credit skip, trickplay previews, per-user profiles, parental controls, and playback statistics are Jellyfin-side features that should be enabled from the dashboard or its official plugin repository after choosing the household policy.
 
 Usenet and private indexers require provider/indexer accounts. They cannot be configured from this repository without credentials; qBittorrent remains the fallback download client.
+
+### Optional Usenet fallback
+
+SABnzbd is included behind the `usenet` Compose profile so it does not start until a provider is configured:
+
+```bash
+docker compose --profile usenet up -d sabnzbd
+```
+
+Open `http://YOUR_SERVER_IP:8081`, configure the Usenet provider and indexer, then add SABnzbd as a download client in both Sonarr and Radarr. Use `/data/usenet/complete` for completed downloads and `/data/usenet/incomplete` for temporary files. The profile is intentionally credential-free; provider and indexer accounts are required.
+
+The health checker can be run manually or from a scheduler. Set `NETFELIX_NOTIFY_URL` in the ignored `.env` if you have a webhook endpoint. `./netfelix.sh backup` creates a permission-protected archive of configuration and databases while the stateful services are stopped; media and torrents are excluded.
 
 This version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; VLC remains the fallback for unsupported formats. Watch Now can expose English subtitle files embedded in the torrent and Arabic/English subtitle files already available through Bazarr, plus local `.srt`/`.vtt` upload with timing controls. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
 

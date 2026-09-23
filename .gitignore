@@ -6,6 +6,7 @@
 /media/
 /torrents/
 /downloads/
+/backups/
 
 # Local agent settings and temporary files
 /.agents/
