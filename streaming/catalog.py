@@ -103,7 +103,7 @@ def resolve(media_type, tmdb_id, qbt):
         # Prefer the actual feature over a sample/trailer when opening a movie automatically.
         if media_type == 'movie' and videos:
             videos = [max(videos, key=lambda f: f['size'])]
-        result['downloads'].append({k: torrent.get(k) for k in ('hash', 'name', 'progress', 'state', 'dlspeed')} | {'files': videos})
+        result['downloads'].append({k: torrent.get(k) for k in ('hash', 'name', 'progress', 'state', 'dlspeed', 'num_seeds', 'num_leechs', 'eta')} | {'files': videos})
     arabic_pat = re.compile(r'\b(arabic|ara|ar[-_.]?dub|dubbed[-_.]?ar|ar[-_.]?audio|مدبلج|دبلجة|الدبلجة|مدبلجة)\b', re.IGNORECASE)
     has_arabic = any(
         bool(arabic_pat.search(t.get('name', '')) or any(arabic_pat.search(f.get('name', '')) for f in t.get('files', [])))

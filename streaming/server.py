@@ -429,7 +429,7 @@ class Handler(BaseHTTPRequestHandler):
                 result = []
                 for t in qbt.call('torrents/info'):
                     files = qbt.call('torrents/files', hash=t['hash'])
-                    result.append({k: t.get(k) for k in ('hash', 'name', 'progress', 'state', 'dlspeed')} | {
+                    result.append({k: t.get(k) for k in ('hash', 'name', 'progress', 'state', 'dlspeed', 'num_seeds', 'num_leechs', 'eta')} | {
                         'files': [{'index': f['index'], 'name': f['name'], 'size': f['size'], 'progress': f['progress']}
                                   for f in files if Path(f['name']).suffix.lower() in VIDEO_EXTENSIONS]})
                 self.reply(200, result)
