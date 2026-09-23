@@ -81,6 +81,7 @@ Live service configuration, databases, credentials, and downloaded media are exc
 - Check all local service endpoints: `./netfelix.sh health`
 - Back up service configuration and databases: `./netfelix.sh backup`
 - Review old completed torrent jobs: `./netfelix.sh cleanup`; remove jobs but keep files with `./netfelix.sh cleanup --apply`
+- Reannounce stalled downloads: `./netfelix.sh recover`
 
 ---
 
@@ -183,6 +184,8 @@ Open `http://YOUR_SERVER_IP:8081`, configure the Usenet provider and indexer, th
 The health checker can be run manually or from a scheduler. Set `NETFELIX_NOTIFY_URL` in the ignored `.env` if you have a webhook endpoint. `./netfelix.sh backup` creates a permission-protected archive of configuration and databases while the stateful services are stopped; media and torrents are excluded.
 
 `./netfelix.sh cleanup` is deliberately a report by default. Its `--apply` mode removes only old completed qBittorrent jobs and passes `deleteFiles=false`, so imported media and downloaded files remain on disk.
+
+The health monitor reannounces stalled downloads every five minutes before checking service health. Reannouncing can recover a peer after a tracker outage, but it cannot create a seeder for a dead release.
 
 This version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; VLC remains the fallback for unsupported formats. Watch Now can expose English subtitle files embedded in the torrent and Arabic/English subtitle files already available through Bazarr, plus local `.srt`/`.vtt` upload with timing controls. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
 

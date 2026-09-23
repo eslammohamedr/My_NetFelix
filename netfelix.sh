@@ -103,8 +103,11 @@ case "${1:-start}" in
     cleanup)
         python3 scripts/cleanup.py "${@:2}"
         ;;
+    recover)
+        python3 scripts/recover_downloads.py
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health|cleanup [--apply]}"
+        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health|cleanup [--apply]|recover}"
         exit 1
         ;;
 esac
