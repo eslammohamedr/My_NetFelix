@@ -100,8 +100,11 @@ case "${1:-start}" in
     health)
         python3 scripts/healthcheck.py
         ;;
+    cleanup)
+        python3 scripts/cleanup.py "${@:2}"
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health}"
+        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health|cleanup [--apply]}"
         exit 1
         ;;
 esac
