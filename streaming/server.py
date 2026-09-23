@@ -564,7 +564,10 @@ class Handler(BaseHTTPRequestHandler):
                 else:
                     self.stream(h, index)
         except Problem as exc:
-            self.reply(exc.status, {'error': str(exc)})
+            try:
+                self.reply(exc.status, {'error': str(exc)})
+            except (BrokenPipeError, ConnectionResetError):
+                self.close_connection = True
         except CatalogError as exc:
             self.reply(503, {'error': str(exc)})
         except (BrokenPipeError, ConnectionResetError, socket.timeout):
