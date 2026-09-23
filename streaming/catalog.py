@@ -111,10 +111,18 @@ def resolve(media_type, tmdb_id, qbt):
     )
     result['has_arabic_dub'] = has_arabic
     result['arabic_dub_missing'] = bool(result['is_arabic_dub'] and not has_arabic)
+    result['peer_summary'] = {
+        'seeders': sum(int(t.get('num_seeds') or 0) for t in result['downloads']),
+        'peers': sum(int(t.get('num_leechs') or 0) for t in result['downloads']),
+        'zero_peer_downloads': sum(1 for t in result['downloads'] if t.get('progress', 0) < 1 and not (t.get('num_seeds') or t.get('num_leechs'))),
+    }
     playable = [t for t in result['downloads'] if t['files'] and t['state'] not in {
         'missingFiles', 'error', 'moving', 'checkingDL', 'checkingUP', 'checkingResumeData'}]
     if playable:
-        result.update(state='download', message='Preparing your video…')
+        if result['peer_summary']['zero_peer_downloads'] and not result['peer_summary']['seeders']:
+            result.update(state='download', message='Download found, but no active peers are available yet. Waiting for a seeder.')
+        else:
+            result.update(state='download', message='Preparing your video…')
     elif result['downloads']:
         result['message'] = 'Waiting for download metadata or files. Check the download state below.'
     elif result['library_path']:

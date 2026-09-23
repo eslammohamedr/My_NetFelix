@@ -6,18 +6,19 @@
 </style></head>
 <body>
 <header><div><h1>My NetFelix <span>Dashboard</span></h1><p>Search, request, watch, and manage your home media from one page.</p></div><a class="button secondary" href="/health">System health</a></header>
-<section class="hero"><h2>Start here</h2><p>Search Jellyseerr first. Use Watch Now for downloads that are still in progress, and Jellyfin for your completed library.</p><div class="actions"><a class="button" href="http://192.168.1.15:5055">🔎 Search & request</a><a class="button secondary" href="/downloads">▶ Watch Now</a><a class="button secondary" href="http://192.168.1.15:8096">🎬 Open Jellyfin</a></div></section>
+<section class="hero"><h2>Start here</h2><p>Search Jellyseerr first. Use Watch Now for downloads that are still in progress, and Jellyfin for your completed library.</p><div class="actions"><a class="button service-link" data-port="5055">🔎 Search & request</a><a class="button secondary" href="/downloads">▶ Watch Now</a><a class="button secondary service-link" data-port="8096">🎬 Open Jellyfin</a></div></section>
 <h2>Media services</h2><section class="grid">
-<article class="card"><h2>Jellyseerr</h2><p>Search movies and series, request seasons, and choose Watch now.</p><a class="button" href="http://192.168.1.15:5055">Open Jellyseerr</a></article>
-<article class="card"><h2>Jellyfin</h2><p>Completed library, profiles, playback, and collections.</p><a class="button secondary" href="http://192.168.1.15:8096">Open Jellyfin</a></article>
+<article class="card"><h2>Jellyseerr</h2><p>Search movies and series, request seasons, and choose Watch now.</p><a class="button service-link" data-port="5055">Open Jellyseerr</a></article>
+<article class="card"><h2>Jellyfin</h2><p>Completed library, profiles, playback, and collections.</p><a class="button secondary service-link" data-port="8096">Open Jellyfin</a></article>
 <article class="card"><h2>Watch Now</h2><p>Play verified video pieces while the download continues.</p><a class="button secondary" href="/downloads">Open Watch Now</a></article>
 </section>
 <h2>Management</h2><section class="grid">
-<article class="card"><h2>Sonarr</h2><p>TV series, seasons, quality profiles, and missing episodes.</p><a class="button secondary" href="http://192.168.1.15:8989">Open Sonarr</a></article>
-<article class="card"><h2>Radarr</h2><p>Movies, quality profiles, and automatic imports.</p><a class="button secondary" href="http://192.168.1.15:7878">Open Radarr</a></article>
-<article class="card"><h2>Bazarr</h2><p>Arabic and other subtitle searches after import.</p><a class="button secondary" href="http://192.168.1.15:6767">Open Bazarr</a></article>
-<article class="card"><h2>Prowlarr</h2><p>Indexer health, search sources, and app synchronization.</p><a class="button secondary" href="http://192.168.1.15:9696">Open Prowlarr</a></article>
-<article class="card"><h2>qBittorrent</h2><p>Download progress, seeders, speed, and active jobs.</p><a class="button secondary" href="http://192.168.1.15:8080">Open qBittorrent</a></article>
+<article class="card"><h2>Sonarr</h2><p>TV series, seasons, quality profiles, and missing episodes.</p><a class="button secondary service-link" data-port="8989">Open Sonarr</a></article>
+<article class="card"><h2>Radarr</h2><p>Movies, quality profiles, and automatic imports.</p><a class="button secondary service-link" data-port="7878">Open Radarr</a></article>
+<article class="card"><h2>Bazarr</h2><p>Arabic and other subtitle searches after import.</p><a class="button secondary service-link" data-port="6767">Open Bazarr</a></article>
+<article class="card"><h2>Prowlarr</h2><p>Indexer health, search sources, and app synchronization.</p><a class="button secondary service-link" data-port="9696">Open Prowlarr</a></article>
+<article class="card"><h2>qBittorrent</h2><p>Download progress, seeders, speed, and active jobs.</p><a class="button secondary service-link" data-port="8080">Open qBittorrent</a></article>
 </section>
+<script>for(const link of document.querySelectorAll('.service-link')){const u=new URL(location.href);u.port=link.dataset.port;u.pathname='/';u.search='';u.hash='';link.href=u.href;}</script>
 <p class="footer">Keep this dashboard on your trusted LAN. The Watch Now service is intentionally not exposed with a separate login.</p>
 </body></html>
