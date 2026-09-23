@@ -6,6 +6,7 @@
 </style></head>
 <body>
 <header><div><h1>My NetFelix <span>Dashboard</span></h1><p>Search, request, watch, and manage your home media from one page.</p></div><a class="button secondary" href="/health">System health</a></header>
+<p id="diagnostics" class="status">Checking download status…</p>
 <section class="hero"><h2>Start here</h2><p>Search Jellyseerr first. Use Watch Now for downloads that are still in progress, and Jellyfin for your completed library.</p><div class="actions"><a class="button service-link" data-port="5055">🔎 Search & request</a><a class="button secondary" href="/downloads">▶ Watch Now</a><a class="button secondary service-link" data-port="8096">🎬 Open Jellyfin</a></div></section>
 <h2>Media services</h2><section class="grid">
 <article class="card"><h2>Jellyseerr</h2><p>Search movies and series, request seasons, and choose Watch now.</p><a class="button service-link" data-port="5055">Open Jellyseerr</a></article>
@@ -19,6 +20,6 @@
 <article class="card"><h2>Prowlarr</h2><p>Indexer health, search sources, and app synchronization.</p><a class="button secondary service-link" data-port="9696">Open Prowlarr</a></article>
 <article class="card"><h2>qBittorrent</h2><p>Download progress, seeders, speed, and active jobs.</p><a class="button secondary service-link" data-port="8080">Open qBittorrent</a></article>
 </section>
-<script>for(const link of document.querySelectorAll('.service-link')){const u=new URL(location.href);u.port=link.dataset.port;u.pathname='/';u.search='';u.hash='';link.href=u.href;}</script>
+<script>for(const link of document.querySelectorAll('.service-link')){const u=new URL(location.href);u.port=link.dataset.port;u.pathname='/';u.search='';u.hash='';link.href=u.href;}fetch('/api/diagnostics').then(r=>r.json()).then(d=>{const gb=n=>(n/1073741824).toFixed(1)+' GB';document.getElementById('diagnostics').textContent=`${d.message} · ${d.active_downloads} active · ${d.stalled_downloads} stalled · ${gb(d.disk.free)} free`;}).catch(()=>{document.getElementById('diagnostics').textContent='Download diagnostics unavailable';});</script>
 <p class="footer">Keep this dashboard on your trusted LAN. The Watch Now service is intentionally not exposed with a separate login.</p>
 </body></html>

@@ -85,6 +85,7 @@ class FakeQbit:
         return {'torrents/info': [self.torrent], 'torrents/files': self.files,
                 'torrents/properties': {'piece_size': 4},
                 'torrents/pieceStates': self.states,
+                'transfer/info': {'dl_info_speed': 0},
                 'torrents/export': b'd4:infod5:filesld6:lengthi3eed6:lengthi12eed6:lengthi50eee12:piece lengthi4eee'}[endpoint]
 
 
@@ -186,6 +187,11 @@ class HTTPIntegration(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertIn('text/html', headers['Content-Type'])
         self.assertIn(b'My NetFelix', body)
+
+    def test_diagnostics_reports_download_state(self):
+        status, _, body = self.request('/api/diagnostics')
+        self.assertEqual(status, 200)
+        self.assertIn(b'active_downloads', body)
 
     def test_subtitles_in_readiness(self):
         ready = s.readiness(HASH, 1)

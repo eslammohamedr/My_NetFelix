@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import re
 import socket
+import shutil
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -420,6 +421,14 @@ class Handler(BaseHTTPRequestHandler):
                 self.reply(200, resolve(media_type, int(tmdb_id), qbt))
             elif path == '/health' and not mutate:
                 self.reply(200, {'status': 'ok'})
+            elif path == '/api/diagnostics' and not mutate:
+                transfer = qbt.call('transfer/info')
+                disk = shutil.disk_usage(ROOT)
+                self.reply(200, {'status': 'ok', 'disk': {'free': disk.free, 'total': disk.total, 'used': disk.used},
+                                 'download_speed': transfer.get('dl_info_speed', 0),
+                                 'active_downloads': sum(1 for t in qbt.call('torrents/info') if t.get('state') in {'downloading', 'metaDL', 'stalledDL'}),
+                                 'stalled_downloads': sum(1 for t in qbt.call('torrents/info') if t.get('state') == 'stalledDL'),
+                                 'message': 'All download sources are idle.' if not transfer.get('dl_info_speed') else 'Downloads are active.'})
             elif path == '/api/sources/internet-archive' and not mutate:
                 query = parse.parse_qs(parse.urlsplit(self.path).query).get('q', [''])[0].strip()
                 if not query or len(query) > 160:
