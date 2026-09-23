@@ -43,7 +43,7 @@ flowchart TD
 ## Hardware Optimization (Laptop Profile)
 
 - **CPU/GPU**: Intel Core i7-4500U with Haswell HD 4400 Graphics.
-- **Hardware Acceleration**: Intel VA-API (`/dev/dri`) is mounted for Jellyfin.
+- **Hardware Acceleration**: Jellyfin is configured for Intel VA-API (`/dev/dri/renderD128`), and the container has access to the render device.
 - **Transcoding Note**: Haswell hardware acceleration handles **H.264 up to 1080p**. It does *not* support hardware decoding for HEVC (H.265) or AV1. To prevent high CPU loads, prioritize **1080p H.264** in Radarr/Sonarr profiles for smooth Direct Play.
 - **Storage Strategy**:
   - **Fast Configs & SQLite Databases** reside on internal SSD (`./config`).
@@ -155,6 +155,16 @@ Live service configuration, databases, credentials, and downloaded media are exc
 The downloads overview remains available for troubleshooting at `http://YOUR_SERVER_IP:8090/downloads`. Direct title links use `/watch/movie/TMDB_ID` or `/watch/tv/TMDB_ID`.
 
 The service checks downloaded pieces before sending bytes, including HTTP byte-range requests. It never treats preallocated file size as proof that video data has downloaded. If playback catches up to the download, it waits; a request times out after 120 seconds without usable data. Retry playback after more data downloads. Seeking ahead does not reprioritize individual pieces and may take a while. Download speed and available peers still determine whether playback can remain smooth.
+
+### Netflix-style operation
+
+The recommended user flow is Jellyseerr as the search home, **Watch now** for an in-progress title, and Jellyfin for the completed library. The Homepage dashboard links these in that order and includes a direct Watch Now downloads view. Sonarr's TV default request profile is set to `Any` so older series can fall back to SD or 720p releases when 1080p is unavailable; Radarr's movie profile remains unchanged.
+
+Watch Now distinguishes Arabic dubbing from subtitles. When an Arabic-dub request resolves to an original-language release, it does not autoplay silently. Bazarr TV episode status is checked as well as movie status, and missing Arabic subtitles are shown before the user chooses to play the original. A subtitle upload remains available for a local `.srt` or `.vtt` file.
+
+Jellyfin is configured for VA-API using `/dev/dri/renderD128`. Keep hardware decoding limited to codecs supported by the machine, and verify a real transcode in the Jellyfin dashboard after changing client quality. Intro/credit skip, trickplay previews, per-user profiles, parental controls, and playback statistics are Jellyfin-side features that should be enabled from the dashboard or its official plugin repository after choosing the household policy.
+
+Usenet and private indexers require provider/indexer accounts. They cannot be configured from this repository without credentials; qBittorrent remains the fallback download client.
 
 This version supports **v1 torrents without padding files**. It rejects v2/hybrid torrents instead of guessing their piece offsets. Browser codec support varies; VLC remains the fallback for unsupported formats. Watch Now can expose English subtitle files embedded in the torrent and Arabic/English subtitle files already available through Bazarr, plus local `.srt`/`.vtt` upload with timing controls. Use Jellyfin for its normal library, transcoding, and subtitle features once the import completes. The streaming service is intended for your trusted LAN and has no separate login; do not expose port 8090 to the internet.
 
