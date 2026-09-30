@@ -206,6 +206,28 @@ def handle_message(msg):
             send_message(chat_id, "❌ تعذر إرسال أمر التحديث.")
         return
 
+    if text.startswith("/recommend"):
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("rec", "/home/dell/Desktop/My_NetFelix/scripts/ai_recommendations.py")
+            rec_mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(rec_mod)
+            rec = rec_mod.pick_recommendation()
+            if rec:
+                msg = (
+                    f"🌟 <b>سهرة اليوم من اختيار الذكاء الاصطناعي:</b>\n\n"
+                    f"🎬 <b>{rec.get('title')}</b> ({rec.get('releaseDate')})\n"
+                    f"⭐ <b>التقييم:</b> {rec.get('rating')}/10\n\n"
+                    f"📝 <i>{rec.get('overview')}</i>\n\n"
+                    f"💡 <i>لتحميل هذا الفيلم، أرسل اسمه الآن: <code>{rec.get('title')}</code></i>"
+                )
+                send_message(chat_id, msg)
+            else:
+                send_message(chat_id, "تعذر إنشاء الاقتراح حالياً.")
+        except Exception as e:
+            send_message(chat_id, f"خطأ في جلب الاقتراح: {e}")
+        return
+
     # Natural Language / Query Request
     dub_mode = "egyptian" if ("بالمصري" in text or "مدبلج" in text) else "auto"
     clean_query = text.replace("بالمصري", "").replace("مدبلج", "").strip()
@@ -244,6 +266,15 @@ def main():
     if me and me.get("ok"):
         bot_user = me["result"]["username"]
         logger.info(f"Bot connected successfully as @{bot_user}")
+        telegram_api("setMyCommands", {
+            "commands": [
+                {"command": "start", "description": "بدء استخدام البوت ومساعد NetFelix"},
+                {"command": "status", "description": "عرض حالة التحميلات وطابور الانتظار"},
+                {"command": "history", "description": "عرض آخر التحميلات المكتملة"},
+                {"command": "recommend", "description": "اقتراح سهرة اليوم بالذكاء الاصطناعي"},
+                {"command": "refresh", "description": "تحديث وفحص مكتبة Jellyfin فوراً"}
+            ]
+        })
     else:
         logger.error(f"Failed to authenticate bot token. Verify TELEGRAM_BOT_TOKEN in .env.")
 
