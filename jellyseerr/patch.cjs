@@ -5,7 +5,8 @@ for (const [component, mediaType] of [['MovieDetails', 'movie'], ['TvDetails', '
   const marker = '          <div className="z-20">\n            <PlayButton links={mediaLinks} />';
   if (source.split(marker).length !== 2) throw new Error(`Unexpected upstream layout in ${path}`);
   source = "import WatchNowButton from '@app/components/WatchNowButton';\n" + source;
-  source = source.replace(marker, `          <WatchNowButton mediaType="${mediaType}" tmdbId={data.id} media={data.mediaInfo} />\n${marker}`);
+  const titleProp = mediaType === 'movie' ? 'data.title' : 'data.name';
+  source = source.replace(marker, `          <WatchNowButton mediaType="${mediaType}" tmdbId={data.id} media={data.mediaInfo} title={${titleProp}} />\n${marker}`);
   fs.writeFileSync(path, source);
 }
 const path = 'next.config.js';

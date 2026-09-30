@@ -57,6 +57,7 @@ print_urls() {
     printf "  %-18s %-32s %s\n" "Prowlarr" "http://${host_ip}:9696" "Torrent Indexers & Sync"
     printf "  %-18s %-32s %s\n" "qBittorrent" "http://${host_ip}:8080" "Torrent Downloader"
     printf "  %-18s %-32s %s\n" "Bazarr" "http://${host_ip}:6767" "Arabic Subtitles"
+    printf "  %-18s %-32s %s\n" "AI Media Agent" "http://${host_ip}:8092" "Universal AI Downloader & Web Studio"
     echo "========================================================================="
     echo ""
 }
@@ -66,20 +67,24 @@ case "${1:-start}" in
         ensure_mounted
         echo ">> Starting My NetFelix stack..."
         docker compose up -d --build
+        systemctl --user restart netfelix-ai-agent.service 2>/dev/null || true
         print_urls
         ;;
     stop|down)
         echo ">> Stopping My NetFelix stack..."
         docker compose down
+        systemctl --user stop netfelix-ai-agent.service 2>/dev/null || true
         ;;
     restart)
         ensure_mounted
         echo ">> Restarting My NetFelix stack..."
         docker compose up -d --build --force-recreate
+        systemctl --user restart netfelix-ai-agent.service 2>/dev/null || true
         print_urls
         ;;
     status|ps)
         docker compose ps
+        systemctl --user status netfelix-ai-agent.service --no-pager 2>/dev/null || true
         print_urls
         ;;
     logs)

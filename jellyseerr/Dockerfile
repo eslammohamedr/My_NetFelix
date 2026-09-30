@@ -14,7 +14,8 @@ FROM fallenbagel/jellyseerr@sha256:4538137bc5af902dece165f2bf73776d9cf4eafb6dd71
 COPY --from=build /app/.next /app/.next
 COPY --from=build /app/next.config.js /app/next.config.js
 # Jellyfin 12+ requires standard Authorization header alongside or instead of legacy X-Emby-Authorization
-RUN node -e "for (const file of ['dist/api/jellyfin.js', 'dist/routes/auth.js', 'dist/routes/avatarproxy.js']) { const p = '/app/' + file; if (require('fs').existsSync(p)) { let s = require('fs').readFileSync(p, 'utf8'); s = s.replace(/'X-Emby-Authorization': (.*?),/g, \"'X-Emby-Authorization': \$1,\\n'Authorization': \$1,\"); require('fs').writeFileSync(p, s); } }"
+COPY patch-auth.cjs /tmp/patch-auth.cjs
+RUN node /tmp/patch-auth.cjs && rm /tmp/patch-auth.cjs
 # Mark build as local to disable upstream update banners in custom container
 RUN echo '{"commitTag": "local"}' > /app/committag.json
 

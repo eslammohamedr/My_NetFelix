@@ -60,6 +60,9 @@ services:
     container_name: netfelix-jellyfin
     restart: unless-stopped
     user: "${PUID}:${PGID}"
+    group_add:
+      - "44"
+      - "993"
     ports:
       - "8096:8096"
     volumes:
@@ -70,6 +73,7 @@ services:
       - /dev/dri:/dev/dri
     environment:
       - TZ=${TZ}
+      - LIBVA_DRIVER_NAME=i965
 
   jellyseerr:
     build: ./jellyseerr
@@ -198,3 +202,30 @@ services:
     environment:
       - LOG_LEVEL=info
       - TZ=${TZ}
+
+  caddy:
+    image: caddy:latest
+    container_name: netfelix-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${CONFIG_ROOT}/caddy/data:/data
+      - ${CONFIG_ROOT}/caddy/config:/config
+    depends_on:
+      - jellyfin
+
+  duckdns:
+    image: lscr.io/linuxserver/duckdns:latest
+    container_name: netfelix-duckdns
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - SUBDOMAINS=eslam-movies
+      - TOKEN=${DUCKDNS_TOKEN:-3bc4acde-5554-426b-9fc9-387d586a7628}
+      - LOG_FILE=false
