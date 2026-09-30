@@ -59,6 +59,8 @@ print_urls() {
     printf "  %-18s %-32s %s\n" "Bazarr" "http://${host_ip}:6767" "Arabic Subtitles"
     printf "  %-18s %-32s %s\n" "AI Media Agent" "http://${host_ip}:8092" "Universal AI Downloader & Web Studio"
     printf "  %-18s %-32s %s\n" "Audiobookshelf" "http://${host_ip}:13378" "Audiobooks & Podcasts Streaming"
+    printf "  %-18s %-32s %s\n" "Immich Photos" "http://${host_ip}:2283" "Google Photos Cloud Alternative"
+    printf "  %-18s %-32s %s\n" "AdGuard Home" "http://${host_ip}:8085" "Ad-Blocker & Network Protection"
     echo "========================================================================="
     echo ""
 }

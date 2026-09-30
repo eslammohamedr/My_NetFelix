@@ -193,6 +193,67 @@ services:
       - AUDIOBOOKSHELF_GID=${PGID}
       - TZ=${TZ}
 
+  adguard:
+    image: adguard/adguardhome:latest
+    container_name: netfelix-adguard
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "3005:3000/tcp"
+      - "8085:80/tcp"
+    volumes:
+      - ${CONFIG_ROOT}/adguard/work:/opt/adguardhome/work
+      - ${CONFIG_ROOT}/adguard/conf:/opt/adguardhome/conf
+    environment:
+      - TZ=${TZ}
+
+  immich-server:
+    image: ghcr.io/immich-app/immich-server:release
+    container_name: netfelix-immich-server
+    restart: unless-stopped
+    ports:
+      - "2283:2283"
+    volumes:
+      - ${MEDIA_ROOT}/media/photos:/usr/src/app/upload
+      - /etc/localtime:/etc/localtime:ro
+    environment:
+      - NODE_ENV=production
+      - DB_HOSTNAME=immich-postgres
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE_NAME=immich
+      - REDIS_HOSTNAME=immich-redis
+    depends_on:
+      - immich-redis
+      - immich-postgres
+
+  immich-machine-learning:
+    image: ghcr.io/immich-app/immich-machine-learning:release
+    container_name: netfelix-immich-machine-learning
+    restart: unless-stopped
+    volumes:
+      - ${CONFIG_ROOT}/immich/model-cache:/cache
+    environment:
+      - NODE_ENV=production
+
+  immich-redis:
+    image: docker.io/redis:6.2-alpine
+    container_name: netfelix-immich-redis
+    restart: unless-stopped
+
+  immich-postgres:
+    image: pgvector/pgvector:pg16
+    container_name: netfelix-immich-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=immich
+      - POSTGRES_INITDB_ARGS=--data-checksums
+    volumes:
+      - ${CONFIG_ROOT}/immich/postgres:/var/lib/postgresql/data
+
   health-monitor:
     image: python:3.12-slim
     container_name: netfelix-health-monitor
