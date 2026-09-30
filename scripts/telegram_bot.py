@@ -48,6 +48,8 @@ def load_env():
 load_env()
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "").strip()
 ALLOWED_USER_ID = os.getenv("TELEGRAM_ALLOWED_USER_ID", "").strip()
+QBITTORRENT_URL = os.getenv("QBITTORRENT_URL", "http://127.0.0.1:8080").rstrip("/")
+
 
 
 def telegram_api(method, data=None):
@@ -97,6 +99,17 @@ def get_ai_history():
         return {"error": str(e)}
 
 
+def get_torrent_downloads():
+    """Fetch active downloading torrents from qBittorrent."""
+    try:
+        req = urllib.request.Request(f"{QBITTORRENT_URL}/api/v2/torrents/info?filter=downloading")
+        with urllib.request.urlopen(req, timeout=5) as r:
+            return json.load(r)
+    except Exception as e:
+        logger.debug(f"Failed to query qBittorrent: {e}")
+        return []
+
+
 def refresh_jellyfin():
     """Trigger library refresh on AI Media Agent."""
     try:
@@ -137,6 +150,8 @@ def handle_message(msg):
     if not chat_id or not text:
         return
 
+    logger.info(f"Incoming message from {first_name} (User ID: {user_id}, Chat: {chat_id}): '{text}'")
+
     # Check security whitelist
     if ALLOWED_USER_ID and user_id != ALLOWED_USER_ID:
         send_message(
@@ -165,24 +180,39 @@ def handle_message(msg):
 
     if text.startswith("/status"):
         st = get_ai_status()
-        if "error" in st:
-            send_message(chat_id, f"❌ تعذر الاتصال بمحرك التحميل: {st['error']}")
+        torrents = get_torrent_downloads()
+        active = st.get("active_job") if isinstance(st, dict) else None
+        pending = st.get("pending_count", 0) if isinstance(st, dict) else 0
+
+        if not active and pending == 0 and not torrents:
+            send_message(chat_id, "💤 <b>لا توجد تحميلات نشطة حالياً.</b>\nالمحرك جاهز وفي انتظار طلباتك!")
             return
 
-        active = st.get("active_job")
-        pending = st.get("pending_count", 0)
-        if not active and pending == 0:
-            send_message(chat_id, "💤 <b>لا توجد تحميلات نشطة حالياً.</b>\nالمحرك جاهز وفي انتظار طلباتك!")
-        else:
-            title = active.get("title") or active.get("query") if active else "غير مسمى"
-            source = active.get("source", "محرك الذكاء الاصطناعي") if active else ""
-            status = (
-                f"⚡ <b>حالة التحميل الآن:</b>\n\n"
-                f"🎬 <b>جاري تحميل:</b> {title}\n"
-                f"📡 <b>المصدر:</b> {source}\n"
-                f"⏳ <b>في الانتظار:</b> {pending} ملفات\n"
-            )
-            send_message(chat_id, status)
+        status_lines = ["⚡ <b>حالة التحميلات الحالية:</b>\n"]
+        if active:
+            title = active.get("title") or active.get("query") or "غير مسمى"
+            source = active.get("source", "محرك الذكاء الاصطناعي")
+            status_lines.append(f"🤖 <b>تحميل مباشر (AI):</b> {title}")
+            status_lines.append(f"📡 <b>المصدر:</b> {source}\n")
+
+        if torrents:
+            status_lines.append("🌊 <b>تنزيلات التورنت (Sonarr/Radarr):</b>")
+            for t in torrents[:5]:
+                t_name = t.get("name", "Torrent")
+                if len(t_name) > 35:
+                    t_name = t_name[:32] + "..."
+                prog = t.get("progress", 0) * 100
+                speed = t.get("dlspeed", 0) / 1024 / 1024
+                seeds = t.get("num_seeds", 0)
+                status_lines.append(f"• <b>{t_name}</b>\n  📊 التقدم: <code>{prog:.1f}%</code> | ⚡ السرعة: <code>{speed:.2f} MB/s</code> (🌱 {seeds})")
+            if len(torrents) > 5:
+                status_lines.append(f"<i>...و {len(torrents) - 5} ملفات أخرى قيد التنزيل</i>")
+            status_lines.append("")
+
+        if pending > 0:
+            status_lines.append(f"⏳ <b>في الانتظار:</b> {pending} ملفات")
+
+        send_message(chat_id, "\n".join(status_lines))
         return
 
     if text.startswith("/history"):
