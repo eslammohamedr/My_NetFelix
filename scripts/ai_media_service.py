@@ -1129,6 +1129,20 @@ class AIRequestHandler(BaseHTTPRequestHandler):
             })
         elif path == "/api/history":
             self._send_json(200, {"history": JOB_HISTORY[-25:]})
+        elif path in ("/api/nilesat.m3u", "/nilesat.m3u"):
+            m3u_file = BASE_MEDIA / "nilesat_egypt.m3u"
+            if m3u_file.exists():
+                with open(m3u_file, "rb") as f:
+                    data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/x-mpegURL; charset=utf-8")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            else:
+                self._send_json(404, {"error": "Nilesat playlist not found"})
         else:
             self._send_json(404, {"error": "Endpoint not found"})
 
