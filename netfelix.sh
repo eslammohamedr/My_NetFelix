@@ -111,8 +111,17 @@ case "${1:-start}" in
     recover)
         python3 scripts/recover_downloads.py
         ;;
+    prune)
+        python3 scripts/auto_prune.py
+        ;;
+    recommend)
+        python3 scripts/ai_recommendations.py
+        ;;
+    bot)
+        systemctl --user status netfelix-telegram-bot.service --no-pager
+        ;;
     *)
-        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health|cleanup [--apply]|recover}"
+        echo "Usage: $0 {start|stop|restart|status|logs [service]|update|backup|health|cleanup [--apply]|recover|prune|recommend|bot}"
         exit 1
         ;;
 esac
