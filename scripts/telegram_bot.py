@@ -107,13 +107,13 @@ def refresh_jellyfin():
         return False
 
 
-def request_download(query, dub_mode="auto"):
+def request_download(query, media_type="movie", dub_mode="auto"):
     """Send download request to AI Media Agent."""
     try:
         payload = json.dumps({
             "title": query,
             "query": query,
-            "mediaType": "movie",
+            "mediaType": media_type,
             "dub": dub_mode
         }).encode("utf-8")
         req = urllib.request.Request(
@@ -229,12 +229,17 @@ def handle_message(msg):
         return
 
     # Natural Language / Query Request
+    is_tv = any(w in text.lower() for w in ["مسلسل", "series", "season", "حلقات", "حلقة", "انمي", "anime", "موسم"])
+    media_type = "tv" if is_tv else "movie"
+
+    clean_query = re.sub(r"^(مسلسل|سلسلة|حلقات|فيلم|series|season)\s+", "", text, flags=re.IGNORECASE).strip()
+    clean_query = clean_query.replace("بالمصري", "").replace("مدبلج", "").strip()
     dub_mode = "egyptian" if ("بالمصري" in text or "مدبلج" in text) else "auto"
-    clean_query = text.replace("بالمصري", "").replace("مدبلج", "").strip()
 
-    send_message(chat_id, f"🔍 <b>جاري البحث والتحميل لـ:</b> <i>{clean_query}</i> بالذكاء الاصطناعي...")
+    type_label = "مسلسل" if is_tv else "فيلم"
+    send_message(chat_id, f"🔍 <b>جاري البحث والتحميل لـ {type_label}:</b> <i>{clean_query}</i> بالذكاء الاصطناعي...")
 
-    res = request_download(clean_query, dub_mode=dub_mode)
+    res = request_download(clean_query, media_type=media_type, dub_mode=dub_mode)
     if "error" in res:
         send_message(chat_id, f"❌ حدث خطأ أثناء إرسال الطلب: {res['error']}")
     else:

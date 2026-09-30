@@ -351,6 +351,24 @@ def add_to_radarr(tmdb_id, title, year=None):
         return False, str(e)
 
 
+def add_to_radarr_by_name(title):
+    """Lookup movie in Radarr by title and command search."""
+    try:
+        req = urllib.request.Request(
+            f"{RADARR_URL}/api/v3/movie/lookup?term={urllib.parse.quote(title)}",
+            headers={"X-Api-Key": RADARR_KEY}
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            lookup = json.load(resp)
+        if not lookup:
+            return False, "Not found in Radarr lookup"
+        movie = lookup[0]
+        return add_to_radarr(movie["tmdbId"], movie["title"], movie.get("year"))
+    except Exception as e:
+        logger.error(f"[Radarr] Error in lookup by name: {e}")
+        return False, str(e)
+
+
 def add_to_sonarr(query, tvdb_id=None):
     """Adds a TV series to Sonarr and triggers automated episode search."""
     try:
@@ -474,6 +492,11 @@ def process_media_request(job):
     dub_pref = job.get("dub_preference", "auto")
     raw_query = job.get("query") or title
 
+    # Auto-detect TV series from query words
+    if any(w in raw_query.lower() for w in ["مسلسل", "series", "season", "حلقات", "حلقة", "انمي", "anime", "موسم"]):
+        media_type = "tv"
+        job["media_type"] = "tv"
+
     logger.info(f"==================================================")
     logger.info(f"Job: '{title or raw_query}' | Type: {media_type} | TMDb: {tmdb_id} | Dub: {dub_pref}")
     logger.info(f"==================================================")
@@ -546,8 +569,8 @@ def process_media_request(job):
                 refresh_jellyseerr()
                 return True
 
-    # Step 4: Handle Arabic Movies / Plays / Series (Egyptian / Arabic Content)
-    if is_arabic_content and dub_pref != "english":
+    # Step 4: Handle Arabic Movies / Plays (Egyptian / Arabic Content)
+    if is_arabic_content and dub_pref != "english" and media_type == "movie":
         search_terms = [title_ar, title_en, raw_query]
         clean_search = next((t for t in search_terms if t and is_arabic_text(t)), title_en)
 
@@ -580,10 +603,10 @@ def process_media_request(job):
                 return True
 
     # Step 5: International / English Movies & Series via Radarr & Sonarr
-    if not is_arabic_content or dub_pref in ("auto", "english", "arabic_subs"):
-        if media_type == "movie" and tmdb_id:
+    if not is_arabic_content or dub_pref in ("auto", "english", "arabic_subs") or media_type == "tv":
+        if media_type == "movie":
             logger.info(f"[Radarr] Routing movie {title_en} to Radarr auto-downloader...")
-            ok, msg = add_to_radarr(tmdb_id, title_en, year)
+            ok, msg = add_to_radarr(tmdb_id, title_en, year) if tmdb_id else add_to_radarr_by_name(title_en)
             if ok:
                 job["status"] = "FORWARDED_TO_ARR"
                 job["source"] = "Radarr + Prowlarr Indexers"
@@ -592,12 +615,13 @@ def process_media_request(job):
                 return True
 
         elif media_type == "tv":
-            logger.info(f"[Sonarr] Routing series {title_en} to Sonarr auto-downloader...")
-            ok, msg = add_to_sonarr(title_en)
+            clean_tv = re.sub(r"^(مسلسل|series|season|حلقات|حلقة)\s+", "", title_en, flags=re.IGNORECASE).strip()
+            logger.info(f"[Sonarr] Routing series '{clean_tv}' to Sonarr auto-downloader...")
+            ok, msg = add_to_sonarr(clean_tv)
             if ok:
                 job["status"] = "FORWARDED_TO_ARR"
                 job["source"] = "Sonarr + Prowlarr Indexers"
-                job["message"] = f"Sonarr searching for {title_en}. Subtitles will sync automatically."
+                job["message"] = f"Sonarr searching for {clean_tv}. Subtitles will sync automatically."
                 run_subtitle_sync()
                 return True
 
