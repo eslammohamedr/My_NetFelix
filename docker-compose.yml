@@ -177,6 +177,22 @@ services:
       - PGID=${PGID}
       - TZ=${TZ}
 
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:latest
+    container_name: netfelix-audiobookshelf
+    restart: unless-stopped
+    ports:
+      - "13378:80"
+    volumes:
+      - ${CONFIG_ROOT}/audiobookshelf/config:/config
+      - ${CONFIG_ROOT}/audiobookshelf/metadata:/metadata
+      - ${MEDIA_ROOT}/media/audiobooks:/audiobooks
+      - ${MEDIA_ROOT}/media/podcasts:/podcasts
+    environment:
+      - AUDIOBOOKSHELF_UID=${PUID}
+      - AUDIOBOOKSHELF_GID=${PGID}
+      - TZ=${TZ}
+
   health-monitor:
     image: python:3.12-slim
     container_name: netfelix-health-monitor
