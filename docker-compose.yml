@@ -215,7 +215,8 @@ services:
     ports:
       - "2283:2283"
     volumes:
-      - ${MEDIA_ROOT}/media/photos:/usr/src/app/upload
+      - /media/dell/Data1/Recovered/photos:/usr/src/app/upload
+      - /media/dell/Data1/Recovered/photos:/mnt/recovered_photos:ro
       - /etc/localtime:/etc/localtime:ro
     environment:
       - NODE_ENV=production
