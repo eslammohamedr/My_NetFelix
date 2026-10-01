@@ -69,6 +69,7 @@ services:
       - ${CONFIG_ROOT}/jellyfin:/config
       - ${CONFIG_ROOT}/jellyfin/cache:/cache
       - ${MEDIA_ROOT}/media:/data/media:rw
+      - /media/dell/Data1/Recovered/photos:/data/photos:ro
     devices:
       - /dev/dri:/dev/dri
     environment:
@@ -227,6 +228,8 @@ services:
       - DB_DATABASE_NAME=immich
       - REDIS_HOSTNAME=immich-redis
       - DB_POOL_SIZE=20
+    devices:
+      - /dev/dri:/dev/dri
     depends_on:
       - immich-redis
       - immich-postgres
