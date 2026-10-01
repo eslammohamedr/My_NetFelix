@@ -305,6 +305,6 @@ services:
       - PUID=${PUID}
       - PGID=${PGID}
       - TZ=${TZ}
-      - SUBDOMAINS=eslam-movies
+      - SUBDOMAINS=eslam-movies,eslam-photos
       - TOKEN=${DUCKDNS_TOKEN:-3bc4acde-5554-426b-9fc9-387d586a7628}
       - LOG_FILE=false
