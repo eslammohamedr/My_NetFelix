@@ -226,6 +226,7 @@ services:
       - DB_PASSWORD=postgres
       - DB_DATABASE_NAME=immich
       - REDIS_HOSTNAME=immich-redis
+      - DB_POOL_SIZE=20
     depends_on:
       - immich-redis
       - immich-postgres
@@ -238,6 +239,8 @@ services:
       - ${CONFIG_ROOT}/immich/model-cache:/cache
     environment:
       - NODE_ENV=production
+      - IMMICH_WORKERS=1
+      - IMMICH_THREADS=2
 
   immich-redis:
     image: docker.io/redis:6.2-alpine
