@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Check the local NetFelix services and optionally notify a webhook."""
+"""Check local NetFelix services, monitor disk space, and alert via Telegram."""
 import json
 import os
 from pathlib import Path
+import shutil
 import sys
 import xml.etree.ElementTree as ET
 from urllib import error, request
@@ -19,7 +20,6 @@ def load_env():
 
 
 SERVICES = {
-    'watch-now': 'http://127.0.0.1:8090/health',
     'jellyfin': 'http://127.0.0.1:8096/health',
     'jellyseerr': 'http://127.0.0.1:5055/api/v1/status',
     'radarr': 'http://127.0.0.1:7878/api/v3/system/status',
@@ -27,7 +27,38 @@ SERVICES = {
     'prowlarr': 'http://127.0.0.1:9696/api/v1/system/status',
     'bazarr': 'http://127.0.0.1:6767/api/providers',
     'qbittorrent': 'http://127.0.0.1:8080/api/v2/app/version',
+    'immich': 'http://127.0.0.1:2283/api/server/version',
+    'adguard': 'http://127.0.0.1:8085',
+    'audiobookshelf': 'http://127.0.0.1:13378/healthcheck',
+    'filebrowser': 'http://127.0.0.1:8082',
+    'watch-now': 'http://127.0.0.1:8090/health',
 }
+
+
+def send_telegram(message):
+    token = os.getenv('TELEGRAM_BOT_TOKEN')
+    chat_id = os.getenv('TELEGRAM_ALLOWED_USER_ID')
+    if not token or not chat_id:
+        return
+    url = f'https://api.telegram.org/bot{token}/sendMessage'
+    body = json.dumps({'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}).encode('utf-8')
+    req = request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+    try:
+        with request.urlopen(req, timeout=10) as resp:
+            pass
+    except OSError:
+        pass
+
+
+def check_disk(path_str, label, min_percent=10):
+    try:
+        usage = shutil.disk_usage(path_str)
+        percent_free = (usage.free / usage.total) * 100
+        free_gb = usage.free / (1024 ** 3)
+        if percent_free < min_percent:
+            send_telegram(f"⚠️ *Disk Warning: {label} is low on space!*\nOnly `{free_gb:.1f} GB` ({percent_free:.1f}%) remaining.")
+    except Exception:
+        pass
 
 
 def check(name, url):
@@ -46,30 +77,30 @@ def check(name, url):
         return False
 
 
-def notify(message):
-    url = os.getenv('NETFELIX_NOTIFY_URL')
-    if not url:
-        return
-    body = json.dumps({'content': message, 'message': message}).encode()
-    req = request.Request(url, data=body, headers={'Content-Type': 'application/json'})
-    try:
-        request.urlopen(req, timeout=8).close()
-    except OSError:
-        pass
+def main():
+    load_env()
+    if not os.getenv('PROWLARR_API_KEY'):
+        config_root = Path(os.getenv('CONFIG_ROOT', './config'))
+        config_file = config_root / 'prowlarr' / 'config.xml'
+        try:
+            os.environ['PROWLARR_API_KEY'] = ET.parse(config_file).getroot().findtext('ApiKey', '')
+        except (OSError, ET.ParseError):
+            pass
+
+    # 1. Check services
+    failed = [name for name, url in SERVICES.items() if not check(name, url)]
+    if failed:
+        msg = f"🔴 *NetFelix Alert: Unhealthy Service(s)*\nServices down: `{', '.join(failed)}`"
+        print(msg, file=sys.stderr)
+        send_telegram(msg)
+        sys.exit(1)
+
+    # 2. Check disk space
+    check_disk('/media/dell/Data1', 'Data1 Storage', min_percent=10)
+    check_disk('/', 'Root System Disk', min_percent=10)
+
+    print('NetFelix services healthy')
 
 
-load_env()
-if not os.getenv('PROWLARR_API_KEY'):
-    config_root = Path(os.getenv('CONFIG_ROOT', './config'))
-    config_file = config_root / 'prowlarr' / 'config.xml'
-    try:
-        os.environ['PROWLARR_API_KEY'] = ET.parse(config_file).getroot().findtext('ApiKey', '')
-    except (OSError, ET.ParseError):
-        pass
-failed = [name for name, url in SERVICES.items() if not check(name, url)]
-if failed:
-    message = 'NetFelix unhealthy services: ' + ', '.join(failed)
-    print(message, file=sys.stderr)
-    notify(message)
-    raise SystemExit(1)
-print('NetFelix services healthy')
+if __name__ == '__main__':
+    main()
