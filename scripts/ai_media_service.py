@@ -42,6 +42,7 @@ TV_DIR = BASE_MEDIA / "tv"
 CONFIG_DIR = Path("/home/dell/Desktop/My_NetFelix/config")
 HISTORY_FILE = CONFIG_DIR / "ai_media_history.json"
 SCRIPTS_DIR = Path("/home/dell/Desktop/My_NetFelix/scripts")
+import samsung_tv
 
 # Service URLs & API Keys
 JELLYSEERR_URL = os.getenv("JELLYSEERR_URL", "http://127.0.0.1:5055")
@@ -1120,6 +1121,10 @@ class AIRequestHandler(BaseHTTPRequestHandler):
         path = urllib.parse.urlsplit(self.path).path
         if path in ("/", "/index.html", "/studio"):
             self._send_html(WEB_STUDIO_HTML)
+        elif path in ("/tv", "/remote", "/samsung"):
+            self._send_html(samsung_tv.TV_REMOTE_HTML)
+        elif path == "/api/tv/status":
+            self._send_json(200, samsung_tv.get_tv_info())
         elif path == "/health":
             self._send_json(200, {"status": "ok", "service": "NetFelix AI Universal Downloader"})
         elif path == "/api/queue":
@@ -1155,6 +1160,24 @@ class AIRequestHandler(BaseHTTPRequestHandler):
             body = json.loads(body_bytes.decode("utf-8")) if body_bytes else {}
         except Exception:
             body = {}
+
+        if path == "/api/tv/send_key":
+            key = body.get("key", "KEY_HOME")
+            res = samsung_tv.send_key(key)
+            self._send_json(200, res)
+            return
+        elif path == "/api/tv/launch_app":
+            res = samsung_tv.launch_app(body.get("app") if isinstance(body, dict) else None)
+            self._send_json(200, res)
+            return
+        elif path == "/api/tv/pair":
+            res = samsung_tv.pair_tv(timeout=25)
+            self._send_json(200, res)
+            return
+        elif path == "/api/tv/wake":
+            res = samsung_tv.wake_tv()
+            self._send_json(200, {"success": res})
+            return
 
         if path == "/webhook/jellyseerr":
             event = body.get("event") or body.get("notification_type") or "UNKNOWN"
