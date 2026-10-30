@@ -1,0 +1,7 @@
+{
+  "method": "Network offline/online in actual Android WebView; Wi-Fi radio and ADB connection retained",
+  "lost": "Connection lost. Your draft is kept; reconnect before applying.",
+  "restored": "Connection restored. Your unapplied draft is kept.",
+  "draftPreserved": true,
+  "failedCommandNotReplayed": true
+}

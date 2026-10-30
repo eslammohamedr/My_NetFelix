@@ -1,0 +1,93 @@
+{
+  "app.js": [
+    "accent",
+    "artImage",
+    "backgroundImages",
+    "cardColor",
+    "cardWidth",
+    "clock24",
+    "customSubtitle",
+    "customTitle",
+    "glassOpacity",
+    "heroArtSize",
+    "highlightColor",
+    "iconTint",
+    "locationMode",
+    "manualLocation",
+    "motion",
+    "showClock",
+    "showPrayer",
+    "showWeather",
+    "slideshowEnabled",
+    "slideshowSeconds",
+    "theme",
+    "units"
+  ],
+  "artwork.js": [
+    "artImage",
+    "logoImage",
+    "theme"
+  ],
+  "boot-theme.js": [
+    "theme"
+  ],
+  "fitness/fitness-ui.js": [
+    "showFitnessApp"
+  ],
+  "home-reference.js": [
+    "customTitle",
+    "theme"
+  ],
+  "home-refinements.js": [
+    "showFitnessApp",
+    "showHomeHdmi",
+    "showLastHdmi",
+    "showRecentApps"
+  ],
+  "iptv/text-size.js": [
+    "fontSizeAr",
+    "fontSizeEn"
+  ],
+  "packs-tv.js": [
+    "artImage",
+    "backgroundImages",
+    "slideshowEnabled",
+    "theme"
+  ],
+  "performance.js": [
+    "motion"
+  ],
+  "plus-tv.js": [
+    "theme"
+  ],
+  "prayer-duas.js": [
+    "prayer"
+  ],
+  "prayer.js": [
+    "clock24",
+    "locationMode",
+    "manualLocation",
+    "prayer",
+    "showPrayer"
+  ],
+  "radio/text-size.js": [
+    "fontSizeAr",
+    "fontSizeEn"
+  ],
+  "text-size.js": [
+    "fontSizeAr",
+    "fontSizeEn"
+  ],
+  "ui/ui-mode.js": [
+    "heroSubtitleSize",
+    "heroTitleSize",
+    "motion",
+    "theme",
+    "uiMode"
+  ],
+  "weather.js": [
+    "locationMode",
+    "manualLocation",
+    "units"
+  ]
+}

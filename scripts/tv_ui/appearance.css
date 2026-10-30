@@ -1,0 +1,98 @@
+/* NetFelix scene and shared theme tokens. Artwork is generated with CSS. */
+body.nf-ready {
+    --cyan-accent: var(--nf-accent); --blue-accent: var(--nf-accent);
+    --bg-card: rgba(12,22,39,.8);
+    --text-muted: #c0cadb;
+    background-color: var(--nf-scene);
+    background-image: linear-gradient(90deg, rgba(3,7,17,.48), rgba(3,7,17,.02)), var(--nf-wallpaper, none), var(--nf-artwork, none),
+        linear-gradient(145deg, #030712, var(--nf-scene));
+    background-size: cover; background-attachment: fixed;
+    padding: 3vh 3.5vw 60px;
+}
+body.nf-ready::before {
+    content: none; position: fixed; z-index: 0; pointer-events: none;
+    width: 70vw; height: 70vw; top: 12vh; right: -32vw; border-radius: 50%;
+    border: 1px solid var(--nf-accent); opacity: .2;
+    box-shadow: -28px -8px 100px var(--nf-accent), inset 20px 10px 90px #000;
+}
+.nf-preview-mode { pointer-events:none; }
+.nf-ready .orb { display: none; }
+.nf-ready #ambilight-halo { opacity: .25; background: radial-gradient(ellipse at 80% 60%, var(--nf-accent), transparent 65%) !important; }
+.nf-ready .tvm-topbar { gap: 18px; flex-wrap: wrap; margin-bottom: 22px; }
+.nf-ready .tvm-brand { flex: 1; }
+.nf-ready .tvm-nav-tabs { order: 3; width: 100%; border-radius: 20px; background: rgba(5,12,24,.52); }
+.nf-ready .nav-tab { font-size: 17px; padding: 12px 16px; }
+.nf-ready .nav-tab.active { background: var(--nf-accent); color: #060b15; box-shadow: none; }
+.nf-ready .remote-guide { font-size: 14px; margin: 12px 0; opacity: .75; }
+.nf-ready .tvm-layout { grid-template-columns: 96px minmax(0,1fr); }
+.nf-ready .left-vertical-dock { gap: 18px; }
+.nf-ready .sidebar-btn { background: rgba(9,16,31,.5); box-shadow: none; border-color: transparent; }
+.nf-ready .main-content { gap: 24px; }
+.nf-ready .tvm-hero-card {
+    height: auto; min-height: 340px; overflow: visible; background: transparent;
+    border: 0; border-radius: 0; box-shadow: none; backdrop-filter: none;
+    cursor: default;
+}
+.nf-ready .hero-left-content { padding: 22px 20px; max-width: 75%; min-width: 0; }
+.nf-ready .hero-headline { font-size: calc(3.7vw * var(--nf-text-scale)); line-height: 1.13; overflow-wrap: break-word; overflow-wrap: anywhere; }
+.nf-ready .hero-desc { font-size: calc(21px * var(--nf-text-scale)); max-width: 760px; color: #d0d7e4; overflow-wrap: break-word; overflow-wrap: anywhere; }
+.nf-ready .hero-tagline { color: var(--nf-accent); }
+.nf-ready .hero-right-visual { position: static; flex: 0; width: 0; background: none !important; }
+.nf-ready .hero-right-visual::before, .nf-ready .hero-right-visual::after { display: none; }
+.nf-ready .hero-prayer-widget { position: absolute; top: 10px; right: 0; bottom: auto; width: 230px; padding: 18px; background: rgba(4,12,25,.65); }
+.nf-ready .prayer-live-timer { font-size: 28px; }
+.nf-ready .tvm-bottom-dock {
+    justify-content: center; flex-wrap: wrap; gap: 22px; padding: 10px 14px 28px;
+    -webkit-box-reflect: unset;
+}
+.nf-ready .dock-app-card { width: 112px; height: 110px; border-radius: 30px; background: rgba(12,22,39,.7) !important; }
+.nf-ready button.dock-app-card { color: #edf3ff; font: inherit; }
+.nf-ready .dock-app-name { display: block; opacity: 1; transform: none; color: #edf3ff; font-size: 14px; }
+.nf-ready .dock-icon { color: var(--nf-accent); font-size: 32px; }
+.nf-ready .recent-grid { display: none; }
+.nf-ready .nf-recent-heading { display: none; }
+.nf-ready .sec-title { font-size: calc(24px * var(--nf-text-scale)); }
+.nf-ready .sidebar-btn .s-label, .nf-ready .nav-tab { font-size: calc(16px * var(--nf-text-scale)); }
+.nf-ready .focusable:focus, .nf-ready .focusable.focused {
+    outline-color: var(--nf-accent) !important;
+    box-shadow: 0 0 0 5px rgba(240,248,255,.14), 0 10px 28px rgba(0,0,0,.4) !important;
+}
+.nf-ready[data-nf-blur=false] * { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.nf-ready[data-nf-glow=false] *, .nf-ready[data-nf-glow=false]::before { box-shadow: none !important; text-shadow: none !important; }
+.nf-ready[data-nf-motion=false] *, .nf-ready[data-nf-motion=false] *::before,
+.nf-ready[data-nf-motion=false] *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+.nf-ready[data-nf-prayer=false] .hero-prayer-widget { display: none; }
+.nf-ready[data-nf-weather=false] .tvm-status-pills > :first-child { display: none; }
+@media(max-width:1400px) {
+    .nf-ready .nav-tab { font-size: calc(14px * var(--nf-text-scale)); padding: 10px 12px; }
+    .nf-ready .hero-left-content { max-width: 74%; padding: 16px; }
+    .nf-ready .hero-prayer-widget { width: 190px; padding: 12px; }
+    .nf-ready .tvm-bottom-dock { gap: 16px; }
+    .nf-ready .dock-app-card { width: 94px; height: 94px; }
+}
+
+/* Shared layout choices are rendered by both the TV and companion iframe. */
+.nf-ready[data-nf-menu="right"] .tvm-layout { grid-template-columns:minmax(0,1fr) 96px; }
+.nf-ready[data-nf-menu="right"] .left-vertical-dock { grid-column:2; grid-row:1; }
+.nf-ready[data-nf-menu="right"] .main-content { grid-column:1; grid-row:1; }
+.nf-ready[data-nf-menu="hidden"] .tvm-layout { grid-template-columns:minmax(0,1fr); }
+.nf-ready[data-nf-menu="hidden"] .left-vertical-dock { display:none; }
+.nf-ready[data-nf-tiles="small"] .tvm-bottom-dock .dock-app-card { width:84px;height:86px;border-radius:22px; }
+.nf-ready[data-nf-tiles="small"] .tvm-bottom-dock .nf-app-icon { width:44px;height:44px; }
+.nf-ready[data-nf-tiles="large"] .tvm-bottom-dock .dock-app-card { width:140px;height:134px; }
+.nf-ready[data-nf-tiles="large"] .tvm-bottom-dock .nf-app-icon { width:80px;height:80px; }
+.nf-ready .tvm-bottom-dock { flex-wrap:wrap; }
+
+#nf-trial-badge{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;padding:14px 24px;border:1px solid #c8daff;border-radius:16px;background:#091424ed;color:#edf3ff;font-size:18px;pointer-events:none;}
+#nf-trial-badge[hidden]{display:none;}
+
+/* Tizen 6 uses Chromium 76: keep modern math behind feature queries. */
+@media (max-width:973px) { .nf-ready .hero-headline { font-size:calc(36px * var(--nf-text-scale)); } }
+@media (min-width:1946px) { .nf-ready .hero-headline { font-size:calc(72px * var(--nf-text-scale)); } }
+@media (min-height:740px) { .nf-ready .tvm-hero-card { min-height:46vh; } }
+@supports (font-size:clamp(36px,3.7vw,72px)) {
+    .nf-ready .hero-headline { font-size:calc(clamp(36px,3.7vw,72px) * var(--nf-text-scale)); }
+}
+@supports (min-height:max(340px,46vh)) {
+    .nf-ready .tvm-hero-card { min-height:max(340px,46vh); }
+}

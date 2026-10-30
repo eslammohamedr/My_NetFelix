@@ -1,0 +1,454 @@
+{
+  "ua": "Mozilla/5.0 (SMART-TV; LINUX; Tizen 6.0) AppleWebKit/537.36 (KHTML, like Gecko) 76.0.3809.146/6.0 TV Safari/537.36",
+  "cases": [
+    {
+      "theme": "islamic-makkah",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "islamic-madinah",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "islamic-quds",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "ac-milan-legends",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "gta6",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "blue-cinema",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "saudi-national",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "egypt-national",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "blue",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "night",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "emerald",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "ahly",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "amber",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "violet",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "zamalek",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "barcelona",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "madrid",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "egypt",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "basketball",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "baseball",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "montreal",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "toronto",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "argentina",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "portugal",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "ismaily",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "king-salman",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "crown-prince",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "nassr",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "hilal",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "ittihad",
+      "icons": "outline",
+      "menu": "hidden",
+      "tiles": "large",
+      "headline": 81.696,
+      "svgs": 9,
+      "heroBottom": 458.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "ahli-saudi",
+      "icons": "glass",
+      "menu": "left",
+      "tiles": "small",
+      "headline": 63.936,
+      "svgs": 9,
+      "heroBottom": 452.78125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    },
+    {
+      "theme": "inter-miami",
+      "icons": "solid",
+      "menu": "right",
+      "tiles": "normal",
+      "headline": 71.04,
+      "svgs": 9,
+      "heroBottom": 455.28125,
+      "dockTop": 702.1875,
+      "artwork": {
+        "width": 1920,
+        "height": 1080
+      }
+    }
+  ],
+  "baselineRestored": true
+}

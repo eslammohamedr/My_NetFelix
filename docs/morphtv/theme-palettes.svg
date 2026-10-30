@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1376" viewBox="0 0 1440 1376">
+<rect width="1440" height="1376" fill="#070c16"/>
+<text x="32" y="48" fill="white" font-family="sans-serif" font-size="27">Morph TV · 32 theme palettes · Samsung 0.8.191 reference</text>
+<rect x="32" y="80" width="328" height="140" rx="16" fill="#0b1825" stroke="#edbd69"/>
+<rect x="48" y="98" width="48" height="8" rx="4" fill="#edbd69"/>
+<text x="48" y="142" fill="white" font-family="sans-serif" font-size="16">Makkah Serenity</text>
+<text x="48" y="172" fill="#edbd69" font-family="monospace" font-size="14">#edbd69 / #0b1825</text>
+<text x="48" y="200" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="384" y="80" width="328" height="140" rx="16" fill="#092b2a" stroke="#88d6af"/>
+<rect x="400" y="98" width="48" height="8" rx="4" fill="#88d6af"/>
+<text x="400" y="142" fill="white" font-family="sans-serif" font-size="16">Madinah Light</text>
+<text x="400" y="172" fill="#88d6af" font-family="monospace" font-size="14">#88d6af / #092b2a</text>
+<text x="400" y="200" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="736" y="80" width="328" height="140" rx="16" fill="#10263d" stroke="#ecc36f"/>
+<rect x="752" y="98" width="48" height="8" rx="4" fill="#ecc36f"/>
+<text x="752" y="142" fill="white" font-family="sans-serif" font-size="16">Jerusalem Gold</text>
+<text x="752" y="172" fill="#ecc36f" font-family="monospace" font-size="14">#ecc36f / #10263d</text>
+<text x="752" y="200" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="1088" y="80" width="328" height="140" rx="16" fill="#230c14" stroke="#ff4155"/>
+<rect x="1104" y="98" width="48" height="8" rx="4" fill="#ff4155"/>
+<text x="1104" y="142" fill="white" font-family="sans-serif" font-size="16">AC Milan Legends</text>
+<text x="1104" y="172" fill="#ff4155" font-family="monospace" font-size="14">#ff4155 / #230c14</text>
+<text x="1104" y="200" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="32" y="240" width="328" height="140" rx="16" fill="#25103e" stroke="#ff78bb"/>
+<rect x="48" y="258" width="48" height="8" rx="4" fill="#ff78bb"/>
+<text x="48" y="302" fill="white" font-family="sans-serif" font-size="16">GTA VI · Vice Sunset</text>
+<text x="48" y="332" fill="#ff78bb" font-family="monospace" font-size="14">#ff78bb / #25103e</text>
+<text x="48" y="360" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="384" y="240" width="328" height="140" rx="16" fill="#07152c" stroke="#61c9ff"/>
+<rect x="400" y="258" width="48" height="8" rx="4" fill="#61c9ff"/>
+<text x="400" y="302" fill="white" font-family="sans-serif" font-size="16">Blue Cinema</text>
+<text x="400" y="332" fill="#61c9ff" font-family="monospace" font-size="14">#61c9ff / #07152c</text>
+<text x="400" y="360" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="736" y="240" width="328" height="140" rx="16" fill="#043d2c" stroke="#38d98d"/>
+<rect x="752" y="258" width="48" height="8" rx="4" fill="#38d98d"/>
+<text x="752" y="302" fill="white" font-family="sans-serif" font-size="16">دام عزك يا وطن</text>
+<text x="752" y="332" fill="#38d98d" font-family="monospace" font-size="14">#38d98d / #043d2c</text>
+<text x="752" y="360" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="1088" y="240" width="328" height="140" rx="16" fill="#171b28" stroke="#ed334b"/>
+<rect x="1104" y="258" width="48" height="8" rx="4" fill="#ed334b"/>
+<text x="1104" y="302" fill="white" font-family="sans-serif" font-size="16">تحيا مصر</text>
+<text x="1104" y="332" fill="#ed334b" font-family="monospace" font-size="14">#ed334b / #171b28</text>
+<text x="1104" y="360" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="32" y="400" width="328" height="140" rx="16" fill="#14283e" stroke="#63caff"/>
+<rect x="48" y="418" width="48" height="8" rx="4" fill="#63caff"/>
+<text x="48" y="462" fill="white" font-family="sans-serif" font-size="16">Twilight blue</text>
+<text x="48" y="492" fill="#63caff" font-family="monospace" font-size="14">#63caff / #14283e</text>
+<text x="48" y="520" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="384" y="400" width="328" height="140" rx="16" fill="#101421" stroke="#8aaeff"/>
+<rect x="400" y="418" width="48" height="8" rx="4" fill="#8aaeff"/>
+<text x="400" y="462" fill="white" font-family="sans-serif" font-size="16">Midnight</text>
+<text x="400" y="492" fill="#8aaeff" font-family="monospace" font-size="14">#8aaeff / #101421</text>
+<text x="400" y="520" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="736" y="400" width="328" height="140" rx="16" fill="#0d302e" stroke="#68e8ba"/>
+<rect x="752" y="418" width="48" height="8" rx="4" fill="#68e8ba"/>
+<text x="752" y="462" fill="white" font-family="sans-serif" font-size="16">Coastal green</text>
+<text x="752" y="492" fill="#68e8ba" font-family="monospace" font-size="14">#68e8ba / #0d302e</text>
+<text x="752" y="520" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="1088" y="400" width="328" height="140" rx="16" fill="#8c1831" stroke="#ff5470"/>
+<rect x="1104" y="418" width="48" height="8" rx="4" fill="#ff5470"/>
+<text x="1104" y="462" fill="white" font-family="sans-serif" font-size="16">Al Ahly SC</text>
+<text x="1104" y="492" fill="#ff5470" font-family="monospace" font-size="14">#ff5470 / #8c1831</text>
+<text x="1104" y="520" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="32" y="560" width="328" height="140" rx="16" fill="#302017" stroke="#ffc680"/>
+<rect x="48" y="578" width="48" height="8" rx="4" fill="#ffc680"/>
+<text x="48" y="622" fill="white" font-family="sans-serif" font-size="16">Golden hour</text>
+<text x="48" y="652" fill="#ffc680" font-family="monospace" font-size="14">#ffc680 / #302017</text>
+<text x="48" y="680" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="384" y="560" width="328" height="140" rx="16" fill="#241632" stroke="#cda2ff"/>
+<rect x="400" y="578" width="48" height="8" rx="4" fill="#cda2ff"/>
+<text x="400" y="622" fill="white" font-family="sans-serif" font-size="16">Aurora violet</text>
+<text x="400" y="652" fill="#cda2ff" font-family="monospace" font-size="14">#cda2ff / #241632</text>
+<text x="400" y="680" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="736" y="560" width="328" height="140" rx="16" fill="#292d41" stroke="#c32240"/>
+<rect x="752" y="578" width="48" height="8" rx="4" fill="#c32240"/>
+<text x="752" y="622" fill="white" font-family="sans-serif" font-size="16">Zamalek SC</text>
+<text x="752" y="652" fill="#c32240" font-family="monospace" font-size="14">#c32240 / #292d41</text>
+<text x="752" y="680" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="1088" y="560" width="328" height="140" rx="16" fill="#102d68" stroke="#8e193e"/>
+<rect x="1104" y="578" width="48" height="8" rx="4" fill="#8e193e"/>
+<text x="1104" y="622" fill="white" font-family="sans-serif" font-size="16">FC Barcelona</text>
+<text x="1104" y="652" fill="#8e193e" font-family="monospace" font-size="14">#8e193e / #102d68</text>
+<text x="1104" y="680" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="32" y="720" width="328" height="140" rx="16" fill="#37316b" stroke="#ddc58e"/>
+<rect x="48" y="738" width="48" height="8" rx="4" fill="#ddc58e"/>
+<text x="48" y="782" fill="white" font-family="sans-serif" font-size="16">Real Madrid</text>
+<text x="48" y="812" fill="#ddc58e" font-family="monospace" font-size="14">#ddc58e / #37316b</text>
+<text x="48" y="840" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="384" y="720" width="328" height="140" rx="16" fill="#151922" stroke="#d41e36"/>
+<rect x="400" y="738" width="48" height="8" rx="4" fill="#d41e36"/>
+<text x="400" y="782" fill="white" font-family="sans-serif" font-size="16">Egypt National Team</text>
+<text x="400" y="812" fill="#d41e36" font-family="monospace" font-size="14">#d41e36 / #151922</text>
+<text x="400" y="840" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="736" y="720" width="328" height="140" rx="16" fill="#261714" stroke="#ed873c"/>
+<rect x="752" y="738" width="48" height="8" rx="4" fill="#ed873c"/>
+<text x="752" y="782" fill="white" font-family="sans-serif" font-size="16">Basketball</text>
+<text x="752" y="812" fill="#ed873c" font-family="monospace" font-size="14">#ed873c / #261714</text>
+<text x="752" y="840" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="1088" y="720" width="328" height="140" rx="16" fill="#14243c" stroke="#d6bc91"/>
+<rect x="1104" y="738" width="48" height="8" rx="4" fill="#d6bc91"/>
+<text x="1104" y="782" fill="white" font-family="sans-serif" font-size="16">Baseball</text>
+<text x="1104" y="812" fill="#d6bc91" font-family="monospace" font-size="14">#d6bc91 / #14243c</text>
+<text x="1104" y="840" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="32" y="880" width="328" height="140" rx="16" fill="#102343" stroke="#df344f"/>
+<rect x="48" y="898" width="48" height="8" rx="4" fill="#df344f"/>
+<text x="48" y="942" fill="white" font-family="sans-serif" font-size="16">Montreal Canadiens</text>
+<text x="48" y="972" fill="#df344f" font-family="monospace" font-size="14">#df344f / #102343</text>
+<text x="48" y="1000" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="384" y="880" width="328" height="140" rx="16" fill="#102956" stroke="#74baff"/>
+<rect x="400" y="898" width="48" height="8" rx="4" fill="#74baff"/>
+<text x="400" y="942" fill="white" font-family="sans-serif" font-size="16">Toronto Maple Leafs</text>
+<text x="400" y="972" fill="#74baff" font-family="monospace" font-size="14">#74baff / #102956</text>
+<text x="400" y="1000" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="736" y="880" width="328" height="140" rx="16" fill="#233e52" stroke="#9bd8f3"/>
+<rect x="752" y="898" width="48" height="8" rx="4" fill="#9bd8f3"/>
+<text x="752" y="942" fill="white" font-family="sans-serif" font-size="16">Argentina</text>
+<text x="752" y="972" fill="#9bd8f3" font-family="monospace" font-size="14">#9bd8f3 / #233e52</text>
+<text x="752" y="1000" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="1088" y="880" width="328" height="140" rx="16" fill="#183d32" stroke="#dc5263"/>
+<rect x="1104" y="898" width="48" height="8" rx="4" fill="#dc5263"/>
+<text x="1104" y="942" fill="white" font-family="sans-serif" font-size="16">Portugal</text>
+<text x="1104" y="972" fill="#dc5263" font-family="monospace" font-size="14">#dc5263 / #183d32</text>
+<text x="1104" y="1000" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="32" y="1040" width="328" height="140" rx="16" fill="#123f82" stroke="#ffcf24"/>
+<rect x="48" y="1058" width="48" height="8" rx="4" fill="#ffcf24"/>
+<text x="48" y="1102" fill="white" font-family="sans-serif" font-size="16">Ismaily SC</text>
+<text x="48" y="1132" fill="#ffcf24" font-family="monospace" font-size="14">#ffcf24 / #123f82</text>
+<text x="48" y="1160" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: free</text>
+<rect x="384" y="1040" width="328" height="140" rx="16" fill="#063d31" stroke="#cfb877"/>
+<rect x="400" y="1058" width="48" height="8" rx="4" fill="#cfb877"/>
+<text x="400" y="1102" fill="white" font-family="sans-serif" font-size="16">King Salman</text>
+<text x="400" y="1132" fill="#cfb877" font-family="monospace" font-size="14">#cfb877 / #063d31</text>
+<text x="400" y="1160" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="736" y="1040" width="328" height="140" rx="16" fill="#064d42" stroke="#d5b876"/>
+<rect x="752" y="1058" width="48" height="8" rx="4" fill="#d5b876"/>
+<text x="752" y="1102" fill="white" font-family="sans-serif" font-size="16">Prince Mohammed bin Salman</text>
+<text x="752" y="1132" fill="#d5b876" font-family="monospace" font-size="14">#d5b876 / #064d42</text>
+<text x="752" y="1160" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="1088" y="1040" width="328" height="140" rx="16" fill="#12377a" stroke="#efc82f"/>
+<rect x="1104" y="1058" width="48" height="8" rx="4" fill="#efc82f"/>
+<text x="1104" y="1102" fill="white" font-family="sans-serif" font-size="16">Al Nassr</text>
+<text x="1104" y="1132" fill="#efc82f" font-family="monospace" font-size="14">#efc82f / #12377a</text>
+<text x="1104" y="1160" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="32" y="1200" width="328" height="140" rx="16" fill="#081d5a" stroke="#3984fa"/>
+<rect x="48" y="1218" width="48" height="8" rx="4" fill="#3984fa"/>
+<text x="48" y="1262" fill="white" font-family="sans-serif" font-size="16">Al Hilal</text>
+<text x="48" y="1292" fill="#3984fa" font-family="monospace" font-size="14">#3984fa / #081d5a</text>
+<text x="48" y="1320" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="384" y="1200" width="328" height="140" rx="16" fill="#171714" stroke="#eccb3c"/>
+<rect x="400" y="1218" width="48" height="8" rx="4" fill="#eccb3c"/>
+<text x="400" y="1262" fill="white" font-family="sans-serif" font-size="16">Al Ittihad</text>
+<text x="400" y="1292" fill="#eccb3c" font-family="monospace" font-size="14">#eccb3c / #171714</text>
+<text x="400" y="1320" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="736" y="1200" width="328" height="140" rx="16" fill="#073c2e" stroke="#4abf8a"/>
+<rect x="752" y="1218" width="48" height="8" rx="4" fill="#4abf8a"/>
+<text x="752" y="1262" fill="white" font-family="sans-serif" font-size="16">Al Ahli Saudi</text>
+<text x="752" y="1292" fill="#4abf8a" font-family="monospace" font-size="14">#4abf8a / #073c2e</text>
+<text x="752" y="1320" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+<rect x="1088" y="1200" width="328" height="140" rx="16" fill="#111115" stroke="#f7b5cd"/>
+<rect x="1104" y="1218" width="48" height="8" rx="4" fill="#f7b5cd"/>
+<text x="1104" y="1262" fill="white" font-family="sans-serif" font-size="16">Inter Miami</text>
+<text x="1104" y="1292" fill="#f7b5cd" font-family="monospace" font-size="14">#f7b5cd / #111115</text>
+<text x="1104" y="1320" fill="#c9d1e0" font-family="sans-serif" font-size="13">Original app access: Plus</text>
+</svg>

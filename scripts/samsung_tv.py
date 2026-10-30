@@ -11,6 +11,7 @@ import time
 import socket
 import base64
 import logging
+import threading
 from pathlib import Path
 
 logger = logging.getLogger("SamsungTV")
@@ -120,7 +121,27 @@ def connect_tv_ws(timeout=5):
         timeout=timeout,
         sslopt={"cert_reqs": ssl.CERT_NONE}
     )
-    return ws
+    # A completed WebSocket upgrade does not mean Samsung has authorized keys yet.
+    # Sending before ms.channel.connect can be silently ignored by the TV.
+    deadline = time.monotonic() + timeout
+    try:
+        while time.monotonic() < deadline:
+            ws.settimeout(max(0.1, deadline - time.monotonic()))
+            message = ws.recv()
+            if not message:
+                raise ConnectionError("TV closed connection before authorizing remote")
+            event = json.loads(message).get("event")
+            if event == "ms.channel.connect":
+                ws.settimeout(timeout)
+                return ws
+            if event == "ms.channel.unauthorized":
+                raise PermissionError("TV rejected remote authorization; pair again")
+            if event == "ms.channel.timeOut":
+                raise TimeoutError("TV remote authorization timed out")
+        raise TimeoutError("TV did not authorize remote connection")
+    except Exception:
+        ws.close()
+        raise
 
 
 def pair_tv(timeout=30):
@@ -162,18 +183,47 @@ def pair_tv(timeout=30):
         return {"success": False, "error": f"تعذر الاتصال بالشاشة: {e}"}
 
 
+_ws_lock = threading.Lock()
+_active_ws = None
+_last_ws_time = 0
+
+
+def get_tv_ws(timeout=3):
+    """Returns an active persistent WebSocket connection to the Samsung TV."""
+    global _active_ws, _last_ws_time
+    now = time.time()
+    # Check if existing connection is alive and used recently (< 90 seconds)
+    if _active_ws is not None:
+        try:
+            if getattr(_active_ws, "connected", False) and (now - _last_ws_time < 90):
+                return _active_ws
+        except Exception:
+            pass
+        try:
+            _active_ws.close()
+        except Exception:
+            pass
+        _active_ws = None
+
+    # Connect new
+    ws = connect_tv_ws(timeout=timeout)
+    _active_ws = ws
+    _last_ws_time = now
+    return _active_ws
+
+
 def send_key(key):
-    """Sends a remote control key command to the Samsung TV."""
-    # Ensure key has KEY_ prefix
+    """Sends a remote control key command to the Samsung TV with sub-millisecond persistent connection."""
+    global _active_ws, _last_ws_time
+
     key_name = key.upper()
     if not key_name.startswith("KEY_"):
         key_name = f"KEY_{key_name}"
 
-    # Handle special case: Power on when in standby via Wake-on-LAN
     if key_name in ("KEY_POWER", "KEY_POWERON"):
         wake_tv()
 
-    payload = {
+    payload = json.dumps({
         "method": "ms.remote.control",
         "params": {
             "Cmd": "Click",
@@ -181,101 +231,225 @@ def send_key(key):
             "Option": "false",
             "TypeOfRemote": "SendRemoteKey"
         }
-    }
+    })
 
-    try:
-        ws = connect_tv_ws(timeout=3)
-        # Check initial message for token if we don't have one
+    with _ws_lock:
+        for attempt in range(2):
+            try:
+                ws = get_tv_ws(timeout=2.5)
+                ws.send(payload)
+                _last_ws_time = time.time()
+                return {"success": True, "key": key_name}
+            except Exception as e:
+                # Connection dropped or timed out, reset and retry once
+                if _active_ws is not None:
+                    try:
+                        _active_ws.close()
+                    except Exception:
+                        pass
+                    _active_ws = None
+                if attempt == 1:
+                    logger.error(f"Error sending key {key_name} to Samsung TV: {e}")
+                    return {"success": False, "error": str(e), "key": key_name}
+
+
+def send_text(text):
+    """Send UTF-8 text to a focused Samsung native input; no text is logged."""
+    global _active_ws, _last_ws_time
+    if not isinstance(text, str) or len(text) > 500 or any(ord(c) < 32 for c in text):
+        raise ValueError("Enter up to 500 printable characters")
+    payload = json.dumps({"method":"ms.remote.control", "params":{
+        "Cmd":base64.b64encode(text.encode("utf-8")).decode("ascii"),
+        "DataOfCmd":"base64", "TypeOfRemote":"SendInputString"}})
+    with _ws_lock:
         try:
-            ws.settimeout(0.5)
-            init_msg = ws.recv()
-            init_data = json.loads(init_msg)
-            if init_data.get("event") == "ms.channel.connect":
-                new_token = init_data.get("data", {}).get("token")
-                if new_token and not load_token():
-                    save_token(new_token)
+            ws = get_tv_ws(timeout=2.5)
+            ws.send(payload)
+            _last_ws_time = time.time()
+            return {"success":True, "message":"Text sent; a native TV input must be focused"}
         except Exception:
-            pass
+            # Do not retry ambiguous text writes, which could duplicate input.
+            if _active_ws is not None:
+                try:
+                    _active_ws.close()
+                except Exception:
+                    pass
+            _active_ws = None
+            return {"success":False, "error":"Could not send text. Check the TV connection and pairing."}
 
-        ws.settimeout(3)
-        ws.send(json.dumps(payload))
-        ws.close()
-        return {"success": True, "key": key_name}
-    except Exception as e:
-        logger.error(f"Error sending key {key_name} to Samsung TV: {e}")
-        return {"success": False, "error": str(e), "key": key_name}
 
-
-# Match the installed names so shortcuts use this TV's own application IDs.
+# Direct map of Samsung Tizen application IDs & URLs for this TV
 TV_APPS = {
-    "youtube": ("YouTube", "youtube"),
-    "netflix": ("Netflix", "netflix"),
-    "shahid": ("Shahid", "shahid", "شاهد"),
-    "jellyfin": ("Jellyfin", "jellyfin"),
-    "tod": ("TOD", "tod"),
-    "watchit": ("WATCH IT", "watchit", "واتشات"),
-    "osn": ("OSN+", "osn", "osnplus"),
-    "disney": ("Disney+", "disney", "disneyplus"),
+    "hub": {
+        "name": "NetFelix Hub",
+        "ids": ["NetFelix01.NetFelixHub"],
+        "type": "app"
+    },
+    "arcade": {
+        "name": "Retro Arcade",
+        "ids": ["ArcadeTV01.RetroArcade"],
+        "type": "app"
+    },
+    "youtube": {
+        "name": "YouTube",
+        "ids": ["111299001912", "9Ur5IzDKqV.TizenYouTube"],
+        "type": "app"
+    },
+    "netflix": {
+        "name": "Netflix",
+        "ids": ["3201907018807", "11101200001", "org.tizen.netflixapp"],
+        "type": "app"
+    },
+    "disney": {
+        "name": "Disney+",
+        "ids": ["3202204027038", "3201901017640"],
+        "type": "app"
+    },
+    "prime": {
+        "name": "Prime Video",
+        "ids": ["3201910019365", "3201512006785"],
+        "type": "app"
+    },
+    "spotify": {
+        "name": "Spotify",
+        "ids": ["3201606009684"],
+        "type": "app"
+    },
+    "appletv": {
+        "name": "Apple TV",
+        "ids": ["3201807016597", "com.samsung.tv.ariavideo"],
+        "type": "app"
+    },
+    "browser": {
+        "name": "المتصفح",
+        "ids": ["3202010022079", "3201907018784", "org.tizen.browser"],
+        "type": "app"
+    },
+    "jellyfin": {
+        "name": "Jellyfin",
+        "ids": ["AprZAARz4r.Jellyfin"],
+        "type": "app"
+    },
+    "netfelix": {
+        "name": "NetFelix (Jellyfin)",
+        "ids": ["AprZAARz4r.Jellyfin"],
+        "type": "app"
+    },
+    "iptv": {
+        "name": "Live TV & Channels",
+        "ids": [
+            "Tv2TzjwBfW.TOD",
+            "AprZAARz4r.Jellyfin",
+            "44q1uK3c70.IBOPlayer",
+            "k8v431l8c8.IBOPlayer",
+            "zBwO4oR3zG.iptvsmarters",
+            "j7qfNf51r4.iptvsmarters",
+            "u7N940uE35.SmartIPTV",
+            "k8e3h9t1m2.FlixIPTV"
+        ],
+        "type": "app"
+    },
+    "tod": {
+        "name": "TOD by beIN",
+        "ids": ["Tv2TzjwBfW.TOD"],
+        "type": "app"
+    },
+    "osn": {
+        "name": "OSN+",
+        "ids": ["3201812017409", "3202111025807"],
+        "type": "fallback_url",
+        "url": "https://osnplus.com"
+    }
 }
 
 
 def launch_app(app):
-    """Resolve an installed app and submit its Samsung launch command."""
-    if not isinstance(app, str) or app not in TV_APPS:
+    """Launches an application directly on Samsung TV using verified IDs and WebSocket DEEP_LINK."""
+    if not isinstance(app, str):
         return {"success": False, "error": "تطبيق غير معروف"}
-    normalize = lambda value: "".join(c for c in str(value).casefold() if c.isalnum())
-    aliases = {normalize(name) for name in TV_APPS[app]}
-    ws = None
-    try:
-        ws = connect_tv_ws(timeout=3)
-        deadline = time.monotonic() + 6
-        while time.monotonic() < deadline:
-            ws.settimeout(max(.1, deadline - time.monotonic()))
-            message = json.loads(ws.recv())
-            event = message.get("event")
-            if event in ("ms.channel.unauthorized", "ms.channel.timeOut"):
-                return {"success": False, "error": "اسمح باتصال الريموت من شاشة التلفزيون"}
-            if event == "ms.channel.connect":
-                token = message.get("data", {}).get("token")
-                if token:
-                    save_token(token)
+
+    app_key = app.strip().lower()
+    config = TV_APPS.get(app_key)
+    if not config:
+        return {"success": False, "error": f"التطبيق '{app}' غير معروف"}
+
+    app_name = config["name"]
+    app_type = config.get("type", "app")
+
+    # 1. Wake TV if in standby
+    wake_tv()
+
+    token = load_token()
+    browser_id = "3202010022079"
+
+    # 2. Handle direct URL launch (e.g. Jellyfin)
+    if app_type == "url":
+        url = config.get("url", "")
+        try:
+            import requests, urllib3
+            urllib3.disable_warnings()
+            requests.post(f"https://{TV_IP}:8002/api/v2/applications/{browser_id}", verify=False, timeout=2.5)
+        except Exception:
+            pass
+
+        try:
+            import samsungtvws
+            tv = samsungtvws.SamsungTVWS(host=TV_IP, port=TV_PORT, token=token, timeout=4)
+            tv.run_app(browser_id, "DEEP_LINK", url)
+            return {"success": True, "app": app_key, "message": f"تم فتح {app_name} على الشاشة بنجاح 🍿"}
+        except Exception as e:
+            logger.error(f"Error launching browser for {app_name}: {e}")
+            return {"success": False, "error": f"تعذر فتح {app_name} على المتصفح"}
+
+    # 3. Check which candidate ID is installed on TV
+    target_id = None
+    import requests, urllib3
+    urllib3.disable_warnings()
+
+    for aid in config.get("ids", []):
+        try:
+            r = requests.get(f"http://{TV_IP}:8001/api/v2/applications/{aid}", timeout=0.8)
+            if r.status_code == 200:
+                target_id = aid
                 break
-        else:
-            raise TimeoutError("TV handshake timed out")
-        ws.send(json.dumps({"method": "ms.channel.emit", "params": {
-            "event": "ed.installedApp.get", "to": "host"}}))
-        deadline = time.monotonic() + 6
-        while time.monotonic() < deadline:
-            ws.settimeout(max(.1, deadline - time.monotonic()))
-            message = json.loads(ws.recv())
-            if message.get("event") != "ed.installedApp.get":
-                continue
-            data = message.get("data", {})
-            if isinstance(data, str):
-                data = json.loads(data)
-            apps = data.get("data", []) if isinstance(data, dict) else data
-            if not isinstance(apps, list):
-                raise ValueError("Invalid installed app list")
-            installed = next((item for item in apps if isinstance(item, dict)
-                              and normalize(item.get("name", "")) in aliases), None)
-            if not installed or not installed.get("appId"):
-                return {"success": False, "error": f"لم يتم العثور على {TV_APPS[app][0]} ضمن تطبيقات التلفزيون المثبتة"}
-            ws.send(json.dumps({"method": "ms.channel.emit", "params": {
-                "event": "ed.apps.launch", "to": "host", "data": {
-                    "appId": installed["appId"],
-                    "action_type": "DEEP_LINK" if str(installed.get("app_type")) == "2" else "NATIVE_LAUNCH",
-                    "metaTag": ""}}}))
-            return {"success": True, "app": app, "message": f"تم إرسال طلب فتح {TV_APPS[app][0]}"}
-        raise TimeoutError("Installed apps unavailable")
-    except Exception as exc:
-        logger.warning("TV app launch failed for %s: %s", app, type(exc).__name__)
-        return {"success": False, "error": "تعذر فتح التطبيق. تأكد أن التلفزيون يعمل ومتصل وأنك سمحت باتصال الريموت."}
-    finally:
-        if ws is not None:
+        except Exception:
+            pass
+
+    # 4. If app is not installed but has a web fallback
+    if not target_id:
+        if app_type == "fallback_url" and config.get("url"):
             try:
-                ws.close()
-            except Exception:
-                pass
+                import samsungtvws
+                tv = samsungtvws.SamsungTVWS(host=TV_IP, port=TV_PORT, token=token, timeout=4)
+                tv.run_app(browser_id, "DEEP_LINK", config["url"])
+                return {"success": True, "app": app_key, "message": f"تم فتح {app_name} عبر متصفح الشاشة"}
+            except Exception as e:
+                logger.error(f"Error launching fallback URL for {app_name}: {e}")
+        return {"success": False, "error": f"تطبيق {app_name} غير مثبت على الشاشة"}
+
+    # 5. Launch the found app via WebSocket run_app first (instant & reliable)
+    success = False
+    try:
+        import samsungtvws
+        tv = samsungtvws.SamsungTVWS(host=TV_IP, port=TV_PORT, token=token, timeout=4)
+        tv.run_app(target_id)
+        success = True
+    except Exception as e:
+        logger.warning(f"WebSocket run_app failed for {app_name} ({target_id}): {e}")
+
+    # Fallback to REST POST if WebSocket had an issue
+    if not success:
+        try:
+            r = requests.post(f"http://{TV_IP}:8001/api/v2/applications/{target_id}", timeout=2)
+            if r.status_code in (200, 204):
+                success = True
+        except Exception as e:
+            logger.warning(f"REST POST fallback failed for {app_name} ({target_id}): {e}")
+
+    if success:
+        return {"success": True, "app": app_key, "message": f"تم فتح {app_name} على الشاشة بنجاح 🚀"}
+    else:
+        return {"success": False, "error": f"تعذر فتح {app_name}"}
 
 
 TV_REMOTE_HTML = """<!DOCTYPE html>
@@ -454,14 +628,14 @@ TV_REMOTE_HTML = """<!DOCTYPE html>
 
         <div class="section-label">وصول سريع</div>
         <div class="app-dock">
+            <button class="app-tile" onclick="launchApp('jellyfin', this)" aria-label="فتح Jellyfin"><span class="app-icon app-brand" style="color: #b5a0ff">🍿</span><span class="app-label">Jellyfin</span></button>
             <button class="app-tile" onclick="launchApp('youtube', this)" aria-label="فتح YouTube"><span class="app-icon app-brand" style="color: #ff6b73">▶</span><span class="app-label">YouTube</span></button>
             <button class="app-tile" onclick="launchApp('netflix', this)" aria-label="فتح Netflix"><span class="app-icon app-brand" style="color: #ff5365">N</span><span class="app-label">Netflix</span></button>
+            <button class="app-tile" onclick="launchApp('disney', this)" aria-label="فتح Disney+"><span class="app-icon app-brand" style="color: #8ab9ff">🏰</span><span class="app-label">Disney+</span></button>
+            <button class="app-tile" onclick="launchApp('prime', this)" aria-label="فتح Prime Video"><span class="app-icon app-brand" style="color: #00a8e1">📦</span><span class="app-label">Prime</span></button>
+            <button class="app-tile" onclick="launchApp('spotify', this)" aria-label="فتح Spotify"><span class="app-icon app-brand" style="color: #1ed760">🎵</span><span class="app-label">Spotify</span></button>
+            <button class="app-tile" onclick="launchApp('appletv', this)" aria-label="فتح Apple TV"><span class="app-icon app-brand" style="color: #d1d5db">🍏</span><span class="app-label">Apple TV</span></button>
             <button class="app-tile" onclick="launchApp('shahid', this)" aria-label="فتح Shahid"><span class="app-icon app-brand" style="color: #58e4ba">شاهد</span><span class="app-label">Shahid</span></button>
-            <button class="app-tile" onclick="launchApp('jellyfin', this)" aria-label="فتح Jellyfin"><span class="app-icon app-brand" style="color: #b5a0ff">△</span><span class="app-label">Jellyfin</span></button>
-            <button class="app-tile" onclick="launchApp('tod', this)" aria-label="فتح TOD"><span class="app-icon app-brand" style="color: #f4ff5d">TOD</span><span class="app-label">TOD</span></button>
-            <button class="app-tile" onclick="launchApp('watchit', this)" aria-label="فتح WATCH IT"><span class="app-icon app-brand" style="color: #ffb96e">WATCH IT</span><span class="app-label">WATCH IT</span></button>
-            <button class="app-tile" onclick="launchApp('osn', this)" aria-label="فتح OSN+"><span class="app-icon app-brand" style="color: #ff80bc">osn+</span><span class="app-label">OSN+</span></button>
-            <button class="app-tile" onclick="launchApp('disney', this)" aria-label="فتح Disney+"><span class="app-icon app-brand" style="color: #8ab9ff">Disney+</span><span class="app-label">Disney+</span></button>
         </div>
 
         <!-- SmartThings 123 Slide-up Number Pad Drawer -->
@@ -523,21 +697,19 @@ TV_REMOTE_HTML = """<!DOCTYPE html>
             }
         }
 
-        async function sendCmd(key) {
-            if (navigator.vibrate) navigator.vibrate(22);
-            try {
-                const res = await fetch('/api/tv/send_key', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({key: key})
-                });
-                const data = await res.json();
+        function sendCmd(key) {
+            if (navigator.vibrate) navigator.vibrate(18);
+            fetch('/api/tv/send_key', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({key: key})
+            }).then(r => r.json()).then(data => {
                 if (!data.success) {
                     showToast('⚠️ اضغط سماح (Allow) على شاشة التلفزيون!');
                 }
-            } catch (err) {
+            }).catch(() => {
                 showToast('❌ تعذر إرسال الأمر للشاشة');
-            }
+            });
         }
 
         function setMode(mode) {

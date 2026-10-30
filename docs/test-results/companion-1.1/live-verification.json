@@ -1,0 +1,27 @@
+{
+  "checkedAt": "2026-10-30T00:43:26.087659+02:00",
+  "/health": {
+    "status": "ok",
+    "service": "NetFelix AI Universal Downloader"
+  },
+  "/api/tv/companion/info": {
+    "service": "netfelix-companion",
+    "version": 1,
+    "dashboardOnline": false
+  },
+  "/api/tv/status": {
+    "online": false,
+    "ip": "192.168.1.2",
+    "token_paired": true
+  },
+  "/api/tv/appearance": {
+    "revision": 3,
+    "themes": 32,
+    "displaySettingsPresent": true
+  },
+  "apk": {
+    "bytes": 34076,
+    "sha256": "fab7ca402201393c5fcb19bbad84dd763f7685519b6e8e667bcc6f8dc8ab63f0"
+  },
+  "discovery": "nonce-bound UDP reply verified on 8093"
+}

@@ -1,0 +1,60 @@
+test_active_queue_matches_media_id (test_catalog.CatalogTests.test_active_queue_matches_media_id) ... ok
+test_announced_release_state (test_catalog.CatalogTests.test_announced_release_state) ... ok
+test_arabic_dub_matched_when_name_contains_arabic (test_catalog.CatalogTests.test_arabic_dub_matched_when_name_contains_arabic) ... ok
+test_arabic_dub_missing_warning_with_downloads (test_catalog.CatalogTests.test_arabic_dub_missing_warning_with_downloads) ... ok
+test_blocked_or_unrequested_titles (test_catalog.CatalogTests.test_blocked_or_unrequested_titles) ... ok
+test_completed_queue_uses_history_and_ignores_same_title (test_catalog.CatalogTests.test_completed_queue_uses_history_and_ignores_same_title) ... ok
+test_invalid_download_ids_not_accepted (test_catalog.CatalogTests.test_invalid_download_ids_not_accepted) ... ok
+test_library_fallback_when_torrent_removed (test_catalog.CatalogTests.test_library_fallback_when_torrent_removed) ... ok
+test_library_title_without_arr_record (test_catalog.CatalogTests.test_library_title_without_arr_record) ... ok
+test_missing_tvdb_id_does_not_guess (test_catalog.CatalogTests.test_missing_tvdb_id_does_not_guess) ... ok
+test_not_found_release_state (test_catalog.CatalogTests.test_not_found_release_state) ... ok
+test_pending_approval_does_not_start_or_lookup_downloads (test_catalog.CatalogTests.test_pending_approval_does_not_start_or_lookup_downloads) ... ok
+test_queue_pagination (test_catalog.CatalogTests.test_queue_pagination) ... ok
+test_theatrical_release_state (test_catalog.CatalogTests.test_theatrical_release_state) ... ok
+test_tv_uses_tvdb_id_and_preserves_episode_choices (test_catalog.CatalogTests.test_tv_uses_tvdb_id_and_preserves_episode_choices) ... ok
+test_buffer_requires_tail_and_disk (test_server.HTTPIntegration.test_buffer_requires_tail_and_disk) ... ok
+test_dashboard_is_available_at_root (test_server.HTTPIntegration.test_dashboard_is_available_at_root) ... 127.0.0.1 - - [29/Oct/2026 16:11:11] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [29/Oct/2026 16:11:11] "GET / HTTP/1.1" 404 -
+ok
+test_diagnostics_reports_download_state (test_server.HTTPIntegration.test_diagnostics_reports_download_state) ... 127.0.0.1 - - [29/Oct/2026 16:11:11] "GET /api/diagnostics HTTP/1.1" 200 -
+127.0.0.1 - - [29/Oct/2026 16:11:11] "GET /api/diagnostics HTTP/1.1" 404 -
+ok
+test_missing_files_rejected (test_server.HTTPIntegration.test_missing_files_rejected) ... 127.0.0.1 - - [29/Oct/2026 16:11:12] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 409 -
+ok
+test_missing_piece_timeout (test_server.HTTPIntegration.test_missing_piece_timeout) ... 127.0.0.1 - - [29/Oct/2026 16:11:13] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 503 -
+ok
+test_missing_piece_waits_instead_of_reading_existing_bytes (test_server.HTTPIntegration.test_missing_piece_waits_instead_of_reading_existing_bytes) ... 127.0.0.1 - - [29/Oct/2026 16:11:15] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 206 -
+ok
+test_playlist_includes_subtitle_option (test_server.HTTPIntegration.test_playlist_includes_subtitle_option) ... 127.0.0.1 - - [29/Oct/2026 16:11:15] "GET /playlist/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 200 -
+ok
+test_prepare_is_idempotent_and_requires_header (test_server.HTTPIntegration.test_prepare_is_idempotent_and_requires_header) ... 127.0.0.1 - - [29/Oct/2026 16:11:16] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 403 -
+127.0.0.1 - - [29/Oct/2026 16:11:16] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Oct/2026 16:11:16] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Oct/2026 16:11:16] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 403 -
+ok
+test_prepare_multi_video_focuses_bandwidth_on_selected_file (test_server.HTTPIntegration.test_prepare_multi_video_focuses_bandwidth_on_selected_file) ... 127.0.0.1 - - [29/Oct/2026 16:11:16] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 200 -
+ok
+test_prepare_prioritizes_subtitles (test_server.HTTPIntegration.test_prepare_prioritizes_subtitles) ... 127.0.0.1 - - [29/Oct/2026 16:11:17] "POST /api/prepare/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 200 -
+ok
+test_pwa_manifest_is_available (test_server.HTTPIntegration.test_pwa_manifest_is_available) ... 127.0.0.1 - - [29/Oct/2026 16:11:17] "GET /manifest.json HTTP/1.1" 200 -
+127.0.0.1 - - [29/Oct/2026 16:11:17] "GET /manifest.json HTTP/1.1" 404 -
+ok
+test_subtitles_endpoint_and_vtt (test_server.HTTPIntegration.test_subtitles_endpoint_and_vtt) ... 127.0.0.1 - - [29/Oct/2026 16:11:18] "GET /subtitles/torrent/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/2.vtt HTTP/1.1" 200 -
+ok
+test_subtitles_in_readiness (test_server.HTTPIntegration.test_subtitles_in_readiness) ... ok
+test_verified_range_and_suffix (test_server.HTTPIntegration.test_verified_range_and_suffix) ... 127.0.0.1 - - [29/Oct/2026 16:11:19] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 206 -
+127.0.0.1 - - [29/Oct/2026 16:11:19] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 206 -
+127.0.0.1 - - [29/Oct/2026 16:11:19] "GET /stream/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/1 HTTP/1.1" 416 -
+ok
+test_detect_language (test_server.Helpers.test_detect_language) ... ok
+test_metadata (test_server.Helpers.test_metadata) ... ok
+test_path_confinement_and_incomplete_suffix (test_server.Helpers.test_path_confinement_and_incomplete_suffix) ... ok
+test_ranges (test_server.Helpers.test_ranges) ... ok
+test_srt_to_vtt (test_server.Helpers.test_srt_to_vtt) ... ok
+test_unaligned_file_offset (test_server.Helpers.test_unaligned_file_offset) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 9.115s
+
+OK

@@ -1,0 +1,14 @@
+{
+  "version": "1.1.1",
+  "versionCode": 3,
+  "bytes": 22291,
+  "sha256": "156fc12fafd91ce13e6b66959675c40d03651190e02655a70198864fa5043d11",
+  "installedWirelessly": true,
+  "deviceAndroidSdk": 37,
+  "minSdk": 26,
+  "targetSdk": 35,
+  "signatureVerified": true,
+  "lintErrors": 0,
+  "lintWarnings": 2,
+  "installedApkMatchesBuild": true
+}

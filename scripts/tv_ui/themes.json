@@ -1,0 +1,258 @@
+[
+  {
+    "id": "islamic-makkah",
+    "name": "Makkah Serenity",
+    "primary": "#edbd69",
+    "secondary": "#0b1825",
+    "artwork": "/tv-ui/scenes/islamic-makkah.svg",
+    "iconStyle": "outline"
+  },
+  {
+    "id": "islamic-madinah",
+    "name": "Madinah Light",
+    "primary": "#88d6af",
+    "secondary": "#092b2a",
+    "artwork": "/tv-ui/scenes/islamic-madinah.svg",
+    "iconStyle": "outline"
+  },
+  {
+    "id": "islamic-quds",
+    "name": "Jerusalem Gold",
+    "primary": "#ecc36f",
+    "secondary": "#10263d",
+    "artwork": "/tv-ui/scenes/islamic-quds.svg",
+    "iconStyle": "outline"
+  },
+  {
+    "id": "ac-milan-legends",
+    "name": "AC Milan Legends",
+    "primary": "#ff4155",
+    "secondary": "#230c14",
+    "artwork": "/tv-ui/scenes/ac-milan-legends.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "gta6",
+    "name": "GTA VI · Vice Sunset",
+    "primary": "#ff78bb",
+    "secondary": "#25103e",
+    "artwork": "/tv-ui/scenes/gta6.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "blue-cinema",
+    "name": "Blue Cinema",
+    "primary": "#61c9ff",
+    "secondary": "#07152c",
+    "artwork": "/tv-ui/scenes/blue-cinema.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "saudi-national",
+    "name": "دام عزك يا وطن",
+    "primary": "#38d98d",
+    "secondary": "#043d2c",
+    "artwork": "/tv-ui/scenes/saudi-national.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "egypt-national",
+    "name": "تحيا مصر",
+    "primary": "#ed334b",
+    "secondary": "#171b28",
+    "artwork": "/tv-ui/scenes/egypt-national.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "blue",
+    "name": "Twilight blue",
+    "primary": "#63caff",
+    "secondary": "#14283e",
+    "artwork": "/tv-ui/scenes/blue.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "night",
+    "name": "Midnight",
+    "primary": "#8aaeff",
+    "secondary": "#101421",
+    "artwork": "/tv-ui/scenes/night.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "emerald",
+    "name": "Coastal green",
+    "primary": "#68e8ba",
+    "secondary": "#0d302e",
+    "artwork": "/tv-ui/scenes/emerald.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "ahly",
+    "name": "Al Ahly SC",
+    "primary": "#ff5470",
+    "secondary": "#8c1831",
+    "artwork": "/tv-ui/scenes/ahly.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "amber",
+    "name": "Golden hour",
+    "primary": "#ffc680",
+    "secondary": "#302017",
+    "artwork": "/tv-ui/scenes/amber.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "violet",
+    "name": "Aurora violet",
+    "primary": "#cda2ff",
+    "secondary": "#241632",
+    "artwork": "/tv-ui/scenes/violet.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "zamalek",
+    "name": "Zamalek SC",
+    "primary": "#c32240",
+    "secondary": "#292d41",
+    "artwork": "/tv-ui/scenes/zamalek.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "barcelona",
+    "name": "FC Barcelona",
+    "primary": "#8e193e",
+    "secondary": "#102d68",
+    "artwork": "/tv-ui/scenes/barcelona.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "madrid",
+    "name": "Real Madrid",
+    "primary": "#ddc58e",
+    "secondary": "#37316b",
+    "artwork": "/tv-ui/scenes/madrid.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "egypt",
+    "name": "Egypt National Team",
+    "primary": "#d41e36",
+    "secondary": "#151922",
+    "artwork": "/tv-ui/scenes/egypt.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "basketball",
+    "name": "Basketball",
+    "primary": "#ed873c",
+    "secondary": "#261714",
+    "artwork": "/tv-ui/scenes/basketball.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "baseball",
+    "name": "Baseball",
+    "primary": "#d6bc91",
+    "secondary": "#14243c",
+    "artwork": "/tv-ui/scenes/baseball.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "montreal",
+    "name": "Montreal Canadiens",
+    "primary": "#df344f",
+    "secondary": "#102343",
+    "artwork": "/tv-ui/scenes/montreal.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "toronto",
+    "name": "Toronto Maple Leafs",
+    "primary": "#74baff",
+    "secondary": "#102956",
+    "artwork": "/tv-ui/scenes/toronto.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "argentina",
+    "name": "Argentina",
+    "primary": "#9bd8f3",
+    "secondary": "#233e52",
+    "artwork": "/tv-ui/scenes/argentina.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "portugal",
+    "name": "Portugal",
+    "primary": "#dc5263",
+    "secondary": "#183d32",
+    "artwork": "/tv-ui/scenes/portugal.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "ismaily",
+    "name": "Ismaily SC",
+    "primary": "#ffcf24",
+    "secondary": "#123f82",
+    "artwork": "/tv-ui/scenes/ismaily.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "king-salman",
+    "name": "King Salman",
+    "primary": "#cfb877",
+    "secondary": "#063d31",
+    "artwork": "/tv-ui/scenes/king-salman.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "crown-prince",
+    "name": "Prince Mohammed bin Salman",
+    "primary": "#d5b876",
+    "secondary": "#064d42",
+    "artwork": "/tv-ui/scenes/crown-prince.svg",
+    "iconStyle": "glass"
+  },
+  {
+    "id": "nassr",
+    "name": "Al Nassr",
+    "primary": "#efc82f",
+    "secondary": "#12377a",
+    "artwork": "/tv-ui/scenes/nassr.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "hilal",
+    "name": "Al Hilal",
+    "primary": "#3984fa",
+    "secondary": "#081d5a",
+    "artwork": "/tv-ui/scenes/hilal.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "ittihad",
+    "name": "Al Ittihad",
+    "primary": "#eccb3c",
+    "secondary": "#171714",
+    "artwork": "/tv-ui/scenes/ittihad.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "ahli-saudi",
+    "name": "Al Ahli Saudi",
+    "primary": "#4abf8a",
+    "secondary": "#073c2e",
+    "artwork": "/tv-ui/scenes/ahli-saudi.svg",
+    "iconStyle": "solid"
+  },
+  {
+    "id": "inter-miami",
+    "name": "Inter Miami",
+    "primary": "#f7b5cd",
+    "secondary": "#111115",
+    "artwork": "/tv-ui/scenes/inter-miami.svg",
+    "iconStyle": "solid"
+  }
+]

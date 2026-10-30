@@ -1,0 +1,8 @@
+{
+  "allRequestedFeatureGroupsVerified": true,
+  "physicalAndroidAndTvUsed": true,
+  "visualConfirmationReceived": true,
+  "installedVersion": "1.1.1",
+  "originalAppearanceRestored": true,
+  "networkRecoveryMethod": "actual Android WebView offline/online emulation; Wi-Fi radio retained for wireless debugging"
+}

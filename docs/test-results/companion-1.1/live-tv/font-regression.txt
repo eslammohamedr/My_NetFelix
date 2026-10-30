@@ -1,0 +1,7 @@
+test_text_sizes_change_both_preview_and_tv (test_tv_appearance_browser.BrowserFeatures.test_text_sizes_change_both_preview_and_tv) ... ok
+test_long_custom_text_does_not_overlap_dock (test_tv_appearance_browser.BrowserFeatures.test_long_custom_text_does_not_overlap_dock) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 15.102s
+
+OK

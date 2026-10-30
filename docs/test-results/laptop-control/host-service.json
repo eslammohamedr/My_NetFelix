@@ -1,0 +1,16 @@
+{
+  "serviceEnabled": true,
+  "crashRecoveryVerified": true,
+  "hostRunning": true,
+  "restartCount": 1,
+  "physicalDesktopLauncherInstalled": true,
+  "passwordApprovalPreserved": true,
+  "permanentPasswordOnlyPreserved": true,
+  "dockerBootEnabled": true,
+  "phoneReconnectedAfterHostRestart": true,
+  "liveScreenVerifiedAfterRestart": true,
+  "fullLaptopRebootTested": false,
+  "installerReRunPassed": true,
+  "menuLauncherStartPassed": true,
+  "serviceManagementUsesExplicitUserBus": true
+}

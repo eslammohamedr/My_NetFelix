@@ -16,3 +16,18 @@
 .DS_Store
 __pycache__/
 *.pyc
+
+# Local game libraries, vendor downloads and generated TV packages
+/arcade/games/
+/arcade/bios/
+/arcade/covers/
+/arcade/static/vendor/
+*.wgt
+/tizen_apps/**/author-signature.xml
+/tizen_apps/**/signature1.xml
+/tizen_apps/**/icon.png
+*.bak
+
+# Device captures may contain personal desktop or TV content
+/docs/**/*.png
+/docs/**/*.jpg

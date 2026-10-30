@@ -1,0 +1,59 @@
+> Task :phone:preBuild UP-TO-DATE
+> Task :phone:preDebugBuild UP-TO-DATE
+> Task :phone:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :phone:javaPreCompileDebug UP-TO-DATE
+> Task :phone:checkDebugAarMetadata UP-TO-DATE
+> Task :phone:generateDebugResValues UP-TO-DATE
+> Task :phone:mapDebugSourceSetPaths
+> Task :phone:generateDebugResources
+> Task :phone:packageDebugResources
+> Task :phone:createDebugCompatibleScreenManifests
+> Task :phone:extractDeepLinksDebug UP-TO-DATE
+> Task :phone:mergeDebugResources
+> Task :phone:parseDebugLocalResources
+> Task :phone:processDebugMainManifest
+> Task :phone:processDebugManifest
+> Task :phone:mergeDebugShaders UP-TO-DATE
+> Task :phone:compileDebugShaders NO-SOURCE
+> Task :phone:generateDebugAssets UP-TO-DATE
+> Task :phone:processDebugManifestForPackage
+> Task :phone:mergeDebugAssets UP-TO-DATE
+> Task :phone:compressDebugAssets UP-TO-DATE
+> Task :phone:processDebugJavaRes NO-SOURCE
+> Task :phone:mergeDebugJavaResource UP-TO-DATE
+> Task :phone:checkDebugDuplicateClasses UP-TO-DATE
+> Task :phone:desugarDebugFileDependencies UP-TO-DATE
+> Task :phone:mergeExtDexDebug UP-TO-DATE
+> Task :phone:mergeLibDexDebug UP-TO-DATE
+> Task :phone:mergeDebugJniLibFolders UP-TO-DATE
+> Task :phone:mergeDebugNativeLibs NO-SOURCE
+> Task :phone:stripDebugDebugSymbols NO-SOURCE
+> Task :phone:validateSigningDebug UP-TO-DATE
+> Task :phone:writeDebugAppMetadata UP-TO-DATE
+> Task :phone:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :phone:preDebugAndroidTestBuild SKIPPED
+> Task :phone:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :phone:extractProguardFiles UP-TO-DATE
+> Task :phone:preDebugUnitTestBuild UP-TO-DATE
+> Task :phone:processDebugResources
+> Task :phone:compileDebugJavaWithJavac UP-TO-DATE
+> Task :phone:dexBuilderDebug UP-TO-DATE
+> Task :phone:mergeProjectDexDebug UP-TO-DATE
+> Task :phone:bundleDebugClassesToCompileJar UP-TO-DATE
+> Task :phone:generateDebugAndroidTestLintModel
+> Task :phone:generateDebugLintReportModel
+> Task :phone:generateDebugUnitTestLintModel
+> Task :phone:packageDebug
+> Task :phone:createDebugApkListingFileRedirect
+> Task :phone:assembleDebug
+> Task :phone:lintAnalyzeDebug
+> Task :phone:lintAnalyzeDebugAndroidTest
+> Task :phone:lintAnalyzeDebugUnitTest
+
+> Task :phone:lintReportDebug
+Wrote HTML report to file:///home/dell/Desktop/My_NetFelix/watch-remote/phone/build/reports/lint-results-debug.html
+
+> Task :phone:lintDebug
+
+BUILD SUCCESSFUL in 24s
+42 actionable tasks: 20 executed, 22 up-to-date

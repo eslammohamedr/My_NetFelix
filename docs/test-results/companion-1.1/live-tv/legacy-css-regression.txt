@@ -1,0 +1,6 @@
+test_legacy_tv_font_fallback_without_modern_math (test_tv_appearance_browser.BrowserFeatures.test_legacy_tv_font_fallback_without_modern_math) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 7.936s
+
+OK

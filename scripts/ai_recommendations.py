@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """
-NetFelix AI Personalized Recommendation Engine ("سهرة اليوم")
-Picks a top trending or classic recommendation not yet in library,
-with movie details, rating, poster, and 1-click download command.
+NetFelix AI Personalized Recommendation & Movie Matchmaker Engine
+Supports:
+1. Local Library Matching ("متوفر في مكتبتك جاهز للعرض الفوري")
+2. Trending Discoveries via Jellyseerr ("سهرة مقترحة للتحميل والمشاهدة")
+3. Natural Language Genre/Mood Query Matching
 """
 
+import os
+from local_env import load_local_env
+load_local_env()
 import os
 import sys
 import json
@@ -22,9 +27,9 @@ logging.basicConfig(
 logger = logging.getLogger("Recommendations")
 
 JELLYSEERR_URL = "http://127.0.0.1:5055"
-JELLYSEERR_KEY = os.getenv("JELLYSEERR_API_KEY", "MTc5MDAxMjMyMzcwOTUxY2M5MjhmLWNiNzEtNGQwYi04YjY4LTQ0YTVhZDhlZGQ3YQ==")
+JELLYSEERR_KEY = os.getenv("JELLYSEERR_API_KEY", "")
 JELLYFIN_URL = "http://127.0.0.1:8096"
-JELLYFIN_KEY = os.getenv("JELLYFIN_API_KEY", "4d40f90a8b854cdcbb4faa23134d057b")
+JELLYFIN_KEY = os.getenv("JELLYFIN_API_KEY", "")
 OUTPUT_FILE = Path("/home/dell/Desktop/My_NetFelix/config/daily_recommendation.json")
 
 
@@ -41,8 +46,50 @@ def get_existing_titles():
         return set()
 
 
-def pick_recommendation():
-    existing = get_existing_titles()
+def pick_library_movie(query=None):
+    """Picks a movie from Jellyfin library, optionally matching query or genre."""
+    try:
+        url = f"{JELLYFIN_URL}/Items?IncludeItemTypes=Movie&Recursive=true&Fields=Overview,CommunityRating,Genres,ProductionYear&SortBy=Random"
+        if query:
+            url += f"&SearchTerm={urllib.parse.quote(query)}"
+        req = urllib.request.Request(url, headers={"Authorization": f'MediaBrowser Token="{JELLYFIN_KEY}"'})
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            data = json.load(resp)
+            items = data.get("Items", [])
+
+            if not items and query:
+                url_genre = f"{JELLYFIN_URL}/Items?IncludeItemTypes=Movie&Recursive=true&Fields=Overview,CommunityRating,Genres,ProductionYear&Genres={urllib.parse.quote(query)}"
+                req_g = urllib.request.Request(url_genre, headers={"Authorization": f'MediaBrowser Token="{JELLYFIN_KEY}"'})
+                with urllib.request.urlopen(req_g, timeout=8) as resp_g:
+                    items = json.load(resp_g).get("Items", [])
+
+            if items:
+                pick = random.choice(items[:10])
+                rating = round(pick.get("CommunityRating") or 7.5, 1)
+                genres = pick.get("Genres", [])
+                year = str(pick.get("ProductionYear") or "")
+                return {
+                    "source": "library",
+                    "id": pick.get("Id"),
+                    "title": pick.get("Name"),
+                    "releaseDate": year,
+                    "rating": rating,
+                    "genres": ", ".join(genres) if genres else "أفلام",
+                    "overview": pick.get("Overview", "سهرة مميزة متوفرة وجاهزة للمشاهدة فوراً على سيرفرك!"),
+                    "posterPath": f"{JELLYFIN_URL}/Items/{pick.get('Id')}/Images/Primary?fillWidth=500&quality=90"
+                }
+    except Exception as e:
+        logger.warning(f"Error picking from library: {e}")
+    return None
+
+
+def pick_recommendation(query=None):
+    """Picks either a local library favorite or a trending new discovery."""
+    # If query is passed, try local library first
+    if query:
+        lib_match = pick_library_movie(query)
+        if lib_match:
+            return lib_match
 
     # Discover popular movies from Jellyseerr
     url = f"{JELLYSEERR_URL}/api/v1/discover/movies?sortBy=popularity.desc&page=1"
@@ -53,16 +100,21 @@ def pick_recommendation():
             results = data.get("results", [])
     except Exception as e:
         logger.error(f"Error fetching recommendations: {e}")
-        return None
+        # Fallback to library
+        return pick_library_movie()
 
-    # Filter out already owned movies
+    existing = get_existing_titles()
     candidates = [
         m for m in results
         if m.get("title", "").lower() not in existing
-        and (m.get("mediaInfo", {}).get("status") or 1) == 1  # UNKNOWN status in Jellyseerr
+        and (m.get("mediaInfo", {}).get("status") or 1) == 1
     ]
 
     if not candidates:
+        # If no new candidates, pick from library!
+        lib_pick = pick_library_movie()
+        if lib_pick:
+            return lib_pick
         candidates = results
 
     if not candidates:
@@ -83,6 +135,7 @@ def pick_recommendation():
         pass
 
     rec = {
+        "source": "discover",
         "tmdbId": pick.get("id"),
         "title": pick.get("title"),
         "releaseDate": pick.get("releaseDate", "")[:4],
@@ -101,4 +154,5 @@ def pick_recommendation():
 
 
 if __name__ == "__main__":
-    pick_recommendation()
+    q = sys.argv[1] if len(sys.argv) > 1 else None
+    print(pick_recommendation(q))

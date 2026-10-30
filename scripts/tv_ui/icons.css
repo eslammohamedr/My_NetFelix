@@ -1,0 +1,25 @@
+.nf-app-icon { --nf-brand:#cde4ff; display:inline-flex; align-items:center; justify-content:center; color:var(--nf-brand); width:64px; height:64px; flex:none; }
+.nf-app-icon svg { display:block; width:70%; height:70%; overflow:visible; }
+.dock-app-card .nf-app-icon { border-radius:21px; }
+.nf-ready .dock-icon { display:flex; align-items:center; justify-content:center; }
+.nf-ready .dock-app-card .nf-app-icon { width:68px; height:68px; border-radius:21px; }
+.nf-ready .sidebar-btn .nf-app-icon { width:36px; height:36px; }
+.nf-ready .nav-tab { display:inline-flex; align-items:center; gap:7px; }
+.nf-ready .nav-tab .nf-app-icon { width:23px; height:23px; }
+[data-nf-icons=glass] .dock-app-card {
+    background:linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.025) 45%,rgba(4,12,25,.75)) !important;
+    border-top-color:rgba(255,255,255,.5); border-bottom-color:rgba(255,255,255,.08);
+}
+[data-nf-icons=glass] .dock-app-card .nf-app-icon { background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,0)); filter:drop-shadow(0 5px 6px rgba(0,0,0,.45)); }
+[data-nf-icons=solid] .dock-app-card { border-radius:22px; background:rgba(6,12,25,.85) !important; }
+[data-nf-icons=solid] .dock-app-card .nf-app-icon { background:var(--nf-brand); color:#07101d; box-shadow:inset 0 2px 2px rgba(255,255,255,.35),0 8px 16px rgba(0,0,0,.2); }
+[data-nf-icons=solid] .nf-icon-netflix { background:#16090f !important; color:#ff304b !important; }
+[data-nf-icons=outline] .dock-app-card { background:rgba(3,12,24,.3) !important; border:1px solid var(--nf-accent); border-radius:50%; }
+[data-nf-icons=outline] .dock-app-card .nf-app-icon { color:var(--nf-accent); background:transparent; }
+[data-nf-icons=outline] .nf-icon-youtube rect { fill:var(--nf-accent); }
+[data-nf-icons=outline] .nf-icon-youtube path { fill:#07101d; }
+.mini-dock .dock-app-card .nf-app-icon { border-radius:5px; }
+.icon-samples .dock-app-card .nf-app-icon { border-radius:14px; }
+.nf-ready .dock-app-card:focus .nf-app-icon { transform:scale(1.08); }
+.nf-ready[data-nf-glow=false] .nf-app-icon { filter:none; }
+@media(max-width:1400px){.nf-ready .dock-app-card .nf-app-icon{width:54px;height:54px}}

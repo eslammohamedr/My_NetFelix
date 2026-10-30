@@ -12,6 +12,9 @@ Full autonomous pipeline to download *ANYTHING*:
 """
 
 import os
+from local_env import load_local_env
+load_local_env()
+import os
 import sys
 import time
 import json
@@ -25,7 +28,7 @@ import urllib.request
 import urllib.parse
 import urllib.error
 from pathlib import Path
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from http.server import HTTPServer, ThreadingHTTPServer, BaseHTTPRequestHandler
 
 # Logging configuration
 logging.basicConfig(
@@ -42,13 +45,20 @@ TV_DIR = BASE_MEDIA / "tv"
 CONFIG_DIR = Path("/home/dell/Desktop/My_NetFelix/config")
 HISTORY_FILE = CONFIG_DIR / "ai_media_history.json"
 SCRIPTS_DIR = Path("/home/dell/Desktop/My_NetFelix/scripts")
+from device_dashboard import DEVICE_DASHBOARD_HTML, get_devices_activity_data
+import tv_dashboard
+import tv_settings
+import laptop_control
 import samsung_tv
+import photo_share_manager
+import sports_scraper
+from match_center import MATCH_CENTER_HTML
 
 # Service URLs & API Keys
 JELLYSEERR_URL = os.getenv("JELLYSEERR_URL", "http://127.0.0.1:5055")
-JELLYSEERR_KEY = os.getenv("JELLYSEERR_API_KEY", "MTc5MDAxMjMyMzcwOTUxY2M5MjhmLWNiNzEtNGQwYi04YjY4LTQ0YTVhZDhlZGQ3YQ==")
+JELLYSEERR_KEY = os.getenv("JELLYSEERR_API_KEY", "")
 JELLYFIN_URL = os.getenv("JELLYFIN_URL", "http://127.0.0.1:8096")
-JELLYFIN_KEY = os.getenv("JELLYFIN_API_KEY", "4d40f90a8b854cdcbb4faa23134d057b")
+JELLYFIN_KEY = os.getenv("JELLYFIN_API_KEY", "")
 JELLYFIN_AUTH = (
     'MediaBrowser Client="Jellyseerr", DeviceId="5e868332d3e44ac4b2039ae239698f4d", Version="2.7.3", Token="'
     + JELLYFIN_KEY
@@ -56,14 +66,14 @@ JELLYFIN_AUTH = (
 )
 
 RADARR_URL = os.getenv("RADARR_URL", "http://127.0.0.1:7878")
-RADARR_KEY = os.getenv("RADARR_API_KEY", "6254cab200464f29a49cdb10060a5a26")
+RADARR_KEY = os.getenv("RADARR_API_KEY", "")
 SONARR_URL = os.getenv("SONARR_URL", "http://127.0.0.1:8989")
-SONARR_KEY = os.getenv("SONARR_API_KEY", "29adbfd421e4418bb35dfc5fcddff7e6")
+SONARR_KEY = os.getenv("SONARR_API_KEY", "")
 PROWLARR_URL = os.getenv("PROWLARR_URL", "http://127.0.0.1:9696")
-PROWLARR_KEY = os.getenv("PROWLARR_API_KEY", "5d8c7982ab084676bce252498714c760")
+PROWLARR_KEY = os.getenv("PROWLARR_API_KEY", "")
 QBT_URL = os.getenv("QBT_URL", "http://127.0.0.1:8080")
 BAZARR_URL = os.getenv("BAZARR_URL", "http://127.0.0.1:6767")
-BAZARR_KEY = os.getenv("BAZARR_API_KEY", "36ee82e7b103b981f2097c25f859b9a1")
+BAZARR_KEY = os.getenv("BAZARR_API_KEY", "")
 
 # Known Archive.org Egyptian Dub Catalog (70 Classic Disney Masterpieces)
 ARCHIVE_EGYPTIAN_BASE = "https://archive.org/download/www.arabp-2p.net_202312/%D8%AF%D9%8A%D8%B2%D9%86%D9%89%20%D9%85%D8%AF%D8%A8%D9%84%D8%AC%20%D9%88%D8%A3%D9%81%D9%84%D8%A7%D9%85%20%D8%A3%D8%AE%D8%B1%D9%89/Dubbing%20Egyptian%20Suite/"
@@ -1100,6 +1110,10 @@ class AIRequestHandler(BaseHTTPRequestHandler):
         data = html_content.encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache, no-store, must-revalidate, max-age=0")
+        self.send_header("Pragma", "no-cache")
+        self.send_header("Expires", "0")
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.send_header("Content-Length", str(len(data)))
         self.end_headers()
         self.wfile.write(data)
@@ -1119,10 +1133,102 @@ class AIRequestHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         path = urllib.parse.urlsplit(self.path).path
+        if laptop_control.handle_get(self, path):
+            return
+        if tv_settings.handle_get(self, path):
+            return
         if path in ("/", "/index.html", "/studio"):
             self._send_html(WEB_STUDIO_HTML)
+        elif path in ("/devices", "/network", "/activity"):
+            self._send_html(DEVICE_DASHBOARD_HTML)
+        elif path == "/api/devices/activity":
+            self._send_json(200, get_devices_activity_data())
         elif path in ("/tv", "/remote", "/samsung"):
             self._send_html(samsung_tv.TV_REMOTE_HTML)
+        elif path in ("/tv-dashboard", "/hub", "/tv-hub"):
+            self._send_html(tv_dashboard.get_rendered_html())
+        elif path == "/api/tv/dashboard-data":
+            self._send_json(200, tv_dashboard.get_dashboard_data())
+        elif path in ("/api/wallpaper", "/wallpaper.jpg"):
+            wall_path = Path("/home/dell/Desktop/My_NetFelix/config/wallpaper_custom.jpg")
+            if not wall_path.exists():
+                wall_path = Path("/home/dell/Desktop/1000004853.jpg")
+            if wall_path.exists():
+                with open(wall_path, "rb") as f:
+                    img_data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/jpeg")
+                self.send_header("Content-Length", str(len(img_data)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(img_data)
+                return
+            else:
+                self._send_json(404, {"error": "Wallpaper not found"})
+                return
+        elif path in ("/api/app-icon", "/icon.png"):
+            icon_path = Path("/home/dell/Desktop/My_NetFelix/tizen_apps/NetFelixHub/icon.png")
+            if icon_path.exists():
+                with open(icon_path, "rb") as f:
+                    img_data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "image/png")
+                self.send_header("Content-Length", str(len(img_data)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(img_data)
+                return
+            else:
+                self._send_json(404, {"error": "Icon not found"})
+                return
+        elif path in ("/api/hls.min.js", "/hls.min.js"):
+            hls_path = Path("/home/dell/Desktop/My_NetFelix/config/hls.min.js")
+            if hls_path.exists():
+                with open(hls_path, "rb") as f:
+                    js_data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/javascript")
+                self.send_header("Content-Length", str(len(js_data)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(js_data)
+                return
+            else:
+                self._send_json(404, {"error": "Hls.js not found"})
+                return
+        elif path.startswith("/api/jellyfin/image/"):
+            parts = path.strip("/").split("/")
+            if len(parts) >= 5:
+                item_id = parts[3]
+                img_type = parts[4]
+                jf_url = f"http://127.0.0.1:8096/Items/{item_id}/Images/{img_type}?maxWidth=800&quality=85"
+                try:
+                    req = urllib.request.Request(jf_url, headers={"Authorization": f'MediaBrowser Token="{JELLYFIN_KEY}"'})
+                    with urllib.request.urlopen(req, timeout=4) as r:
+                        content_type = r.headers.get("Content-Type", "image/jpeg")
+                        img_data = r.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", content_type)
+                    self.send_header("Content-Length", str(len(img_data)))
+                    self.send_header("Cache-Control", "public, max-age=86400")
+                    self.send_header("Access-Control-Allow-Origin", "*")
+                    self.end_headers()
+                    self.wfile.write(img_data)
+                    return
+                except Exception:
+                    self._send_json(404, {"error": "Image not found"})
+                    return
+        elif path in ("/photos", "/share-photos", "/folders"):
+            self._send_html(photo_share_manager.PHOTO_SHARE_HTML)
+        elif path == "/api/photos/albums":
+            albums = photo_share_manager.get_all_albums()
+            self._send_json(200, albums)
+        elif path == "/api/photos/shares":
+            shares = photo_share_manager.list_active_shares()
+            self._send_json(200, shares)
         elif path == "/api/tv/status":
             self._send_json(200, samsung_tv.get_tv_info())
         elif path == "/health":
@@ -1134,6 +1240,46 @@ class AIRequestHandler(BaseHTTPRequestHandler):
             })
         elif path == "/api/history":
             self._send_json(200, {"history": JOB_HISTORY[-25:]})
+        elif path in ("/matches", "/sports", "/live-sports", "/bein"):
+            self._send_html(MATCH_CENTER_HTML)
+        elif path == "/api/sports/matches":
+            try:
+                matches = sports_scraper.fetch_todays_matches()
+                self._send_json(200, matches)
+            except Exception as e:
+                self._send_json(500, {"error": str(e)})
+        elif path in ("/api/sports.m3u", "/sports.m3u"):
+            m3u_file = sports_scraper.SPORTS_M3U_FILE
+            if not m3u_file.exists():
+                sports_scraper.generate_sports_m3u()
+            if m3u_file.exists():
+                with open(m3u_file, "rb") as f:
+                    data = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/x-mpegURL; charset=utf-8")
+                self.send_header("Content-Length", str(len(data)))
+                self.send_header("Access-Control-Allow-Origin", "*")
+                self.end_headers()
+                self.wfile.write(data)
+                return
+            else:
+                self._send_json(404, {"error": "Sports playlist not found"})
+        elif path.startswith("/api/sports/stream/"):
+            ch_id = path.split("/")[-1]
+            sources = sports_scraper.load_sources()
+            stream_url = sources.get(ch_id)
+            if not stream_url:
+                ch_info = sports_scraper.CHANNEL_MAP.get(ch_id, {})
+                stream_url = ch_info.get("default_stream", "")
+
+            if not stream_url:
+                stream_url = sources.get("bein_news", "https://shd-amg-fast.edgenextcdn.net/tx001/playlist.m3u8")
+
+            self.send_response(302)
+            self.send_header("Location", stream_url)
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            return
         elif path in ("/api/nilesat.m3u", "/nilesat.m3u"):
             m3u_file = BASE_MEDIA / "nilesat_egypt.m3u"
             if m3u_file.exists():
@@ -1153,6 +1299,8 @@ class AIRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urllib.parse.urlsplit(self.path).path
+        if tv_settings.handle_post(self, path):
+            return
         length = int(self.headers.get("Content-Length", 0))
         body_bytes = self.rfile.read(length) if length > 0 else b"{}"
 
@@ -1257,8 +1405,46 @@ class AIRequestHandler(BaseHTTPRequestHandler):
             t.start()
             self._send_json(200, {"status": "started", "prompt": prompt})
 
+        elif path == "/api/photos/share":
+            album_ids = body.get("albumIds", [])
+            custom_name = body.get("customName", "")
+            allow_download = body.get("allowDownload", False)
+            description = body.get("description", "")
+            try:
+                res = photo_share_manager.create_folder_share_link(
+                    album_ids=album_ids,
+                    custom_name=custom_name,
+                    allow_download=allow_download,
+                    description=description
+                )
+                self._send_json(200, res)
+            except Exception as e:
+                self._send_json(400, {"success": False, "error": str(e)})
+            return
+
+        elif path in ("/api/sports/refresh", "/api/sports/update"):
+            try:
+                matches = sports_scraper.fetch_todays_matches()
+                sports_scraper.generate_sports_m3u(matches)
+                self._send_json(200, {"success": True, "count": len(matches)})
+            except Exception as e:
+                self._send_json(500, {"success": False, "error": str(e)})
+            return
+
         else:
             self._send_json(404, {"error": "Endpoint not found"})
+
+    def do_DELETE(self):
+        path = urllib.parse.urlsplit(self.path).path
+        if path.startswith("/api/photos/shares/"):
+            share_id = path.split("/")[-1]
+            try:
+                res = photo_share_manager.revoke_shared_link(share_id)
+                self._send_json(200, res)
+            except Exception as e:
+                self._send_json(400, {"success": False, "error": str(e)})
+            return
+        self._send_json(404, {"error": "Endpoint not found"})
 
 
 def main():
@@ -1271,8 +1457,26 @@ def main():
     t = threading.Thread(target=worker_thread, daemon=True)
     t.start()
 
-    # Start HTTP Server
-    server = HTTPServer(("0.0.0.0", 8092), AIRequestHandler)
+    # Start Sports & Match Scraper Auto-Refresh Thread (Every 2 Hours)
+    def sports_auto_worker():
+        time.sleep(10) # Initial delay on startup
+        while True:
+            try:
+                logger.info("[Sports] Auto-refreshing today's matches and beIN Sports feeds...")
+                matches = sports_scraper.fetch_todays_matches()
+                sports_scraper.generate_sports_m3u(matches)
+                logger.info(f"[Sports] Successfully auto-refreshed {len(matches)} matches.")
+            except Exception as e:
+                logger.error(f"[Sports] Auto-refresh error: {e}")
+            time.sleep(7200)
+
+    sports_t = threading.Thread(target=sports_auto_worker, daemon=True)
+    sports_t.start()
+
+    tv_settings.tv_companion.start_discovery()
+
+    # Start Multi-Threaded HTTP Server for concurrent, instant requests
+    server = ThreadingHTTPServer(("0.0.0.0", 8092), AIRequestHandler)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

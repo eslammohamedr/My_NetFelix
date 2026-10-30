@@ -38,25 +38,31 @@ def get_disk_free_gb(path):
 
 def prune_stale_temp_files(max_age_hours=24):
     """Removes leftover temporary download fragments older than max_age_hours."""
-    if not MEDIA_ROOT.exists():
-        return 0
+    search_dirs = [
+        Path("/media/dell/Data1/Downloads"),
+        MEDIA_ROOT / "media" / "movies",
+        MEDIA_ROOT / "media" / "tv",
+    ]
 
     now = time.time()
     reclaimed_bytes = 0
     temp_extensions = {".temp.mp4", ".part", ".ytdl", ".aria2"}
 
-    for p in MEDIA_ROOT.rglob("*"):
-        if p.is_file():
-            if any(str(p).endswith(ext) for ext in temp_extensions) or ".temp." in p.name:
-                age_hours = (now - p.stat().st_mtime) / 3600
-                if age_hours > max_age_hours:
-                    size = p.stat().st_size
+    for search_dir in search_dirs:
+        if not search_dir.exists():
+            continue
+        for p in search_dir.rglob("*"):
+            if p.is_file():
+                if any(str(p).endswith(ext) for ext in temp_extensions) or ".temp." in p.name:
                     try:
-                        p.unlink()
-                        reclaimed_bytes += size
-                        logger.info(f"Removed stale temporary file ({round(size/(1024*1024), 1)} MB): {p.name}")
+                        age_hours = (now - p.stat().st_mtime) / 3600
+                        if age_hours > max_age_hours:
+                            size = p.stat().st_size
+                            p.unlink()
+                            reclaimed_bytes += size
+                            logger.info(f"Removed stale temporary file ({round(size/(1024*1024), 1)} MB): {p.name}")
                     except Exception as e:
-                        logger.warning(f"Failed to delete {p}: {e}")
+                        logger.warning(f"Failed to process {p}: {e}")
 
     return reclaimed_bytes / (1024 ** 2)
 
@@ -82,16 +88,51 @@ def prune_transcode_cache(max_age_hours=48):
     return reclaimed_bytes / (1024 ** 2)
 
 
+def prune_completed_torrents(max_seeding_hours=24, min_ratio=1.0):
+    """Safely cleans completed torrents from qBittorrent queue while preserving media files."""
+    import urllib.request
+    import json
+    try:
+        import urllib.parse
+        req = urllib.request.Request("http://127.0.0.1:8080/api/v2/torrents/info?filter=completed")
+        with urllib.request.urlopen(req, timeout=5) as r:
+            torrents = json.load(r)
+
+        pruned = 0
+        for t in torrents:
+            seeding_time = t.get("seeding_time", 0) / 3600
+            ratio = t.get("ratio", 0)
+            h = t.get("hash")
+            if (seeding_time >= max_seeding_hours or ratio >= min_ratio) and h:
+                post_data = urllib.parse.urlencode({
+                    "hashes": h,
+                    "deleteFiles": "false"
+                }).encode("utf-8")
+                del_req = urllib.request.Request(
+                    "http://127.0.0.1:8080/api/v2/torrents/delete",
+                    data=post_data,
+                    headers={"Content-Type": "application/x-www-form-urlencoded"}
+                )
+                urllib.request.urlopen(del_req, timeout=5)
+                pruned += 1
+                logger.info(f"Cleaned completed seeding torrent: {t.get('name')}")
+        return pruned
+    except Exception as e:
+        logger.error(f"Error checking completed torrents: {e}")
+        return 0
+
+
 def run_prune():
     free_gb = get_disk_free_gb(MEDIA_ROOT)
     logger.info(f"Disk check: {round(free_gb, 1)} GB free (Threshold: {MIN_FREE_GB} GB).")
 
     temp_mb = prune_stale_temp_files()
     cache_mb = prune_transcode_cache()
+    torrents_cleaned = prune_completed_torrents()
     total_reclaimed_mb = temp_mb + cache_mb
 
-    if total_reclaimed_mb > 0:
-        logger.info(f"Successfully reclaimed {round(total_reclaimed_mb, 1)} MB of disk space.")
+    if total_reclaimed_mb > 0 or torrents_cleaned > 0:
+        logger.info(f"Successfully reclaimed {round(total_reclaimed_mb, 1)} MB of disk space. Cleaned {torrents_cleaned} completed torrents.")
     else:
         logger.info("Storage is healthy and clean. No stale fragments found.")
 

@@ -1,0 +1,22 @@
+# Private LAN rendezvous/relay for the laptop control clients.
+services:
+  rendezvous:
+    image: rustdesk/rustdesk-server:1.1.16@sha256:8ecdab65deb7c84652a626380e31d11a8f1fbafd97916d57f95c20628f943c00
+    container_name: netfelix-desktop-rendezvous
+    command: ["hbbs", "-r", "192.168.1.15:21117", "-k", "_"]
+    volumes:
+      - ../config/rustdesk-server:/root
+    ports:
+      - "192.168.1.15:21115:21115/tcp"
+      - "192.168.1.15:21116:21116/tcp"
+      - "192.168.1.15:21116:21116/udp"
+    restart: unless-stopped
+  relay:
+    image: rustdesk/rustdesk-server:1.1.16@sha256:8ecdab65deb7c84652a626380e31d11a8f1fbafd97916d57f95c20628f943c00
+    container_name: netfelix-desktop-relay
+    command: ["hbbr", "-k", "_"]
+    volumes:
+      - ../config/rustdesk-server:/root
+    ports:
+      - "192.168.1.15:21117:21117/tcp"
+    restart: unless-stopped

@@ -1,7 +1,49 @@
+(security_headers) {
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "SAMEORIGIN"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+}
+
 eslam-movies.duckdns.org {
+    import security_headers
     reverse_proxy jellyfin:8096
 }
 
+requests.eslam-movies.duckdns.org {
+    import security_headers
+    reverse_proxy jellyseerr:5055
+}
+
 eslam-photos.duckdns.org {
-    reverse_proxy immich-server:2283
+    import security_headers
+
+    request_body {
+        max_size 50GB
+    }
+
+    log {
+        output file /data/photos_access.log {
+            roll_size 10mb
+            roll_keep 5
+        }
+        format json
+    }
+
+    handle /folder-share* {
+        rewrite * /photos
+        reverse_proxy 172.18.0.1:8092
+    }
+
+    handle /api/photos/* {
+        reverse_proxy 172.18.0.1:8092
+    }
+
+    handle {
+        reverse_proxy immich-server:2283
+    }
 }

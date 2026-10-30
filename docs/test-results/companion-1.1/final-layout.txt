@@ -1,0 +1,8 @@
+test_temporary_preview_keep_restore_and_unsaved_layout (test_tv_appearance_browser.BrowserFeatures.test_temporary_preview_keep_restore_and_unsaved_layout) ... ok
+test_preset_export_duplicate_import_and_scheduled_design (test_tv_appearance_browser.BrowserFeatures.test_preset_export_duplicate_import_and_scheduled_design) ... ok
+test_side_menu_layout_and_focus_follow_position (test_tv_appearance_browser.BrowserFeatures.test_side_menu_layout_and_focus_follow_position) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 15.775s
+
+OK

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#102956"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#74baff" stop-opacity=".5"/><stop offset="1" stop-color="#74baff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#74baff"/><stop offset=".6" stop-color="#102956"/><stop offset="1" stop-color="#74baff"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#74baff" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<path d="M700 770Q1300 420 1970 710L1980 1080H600Z" fill="#060e19"/>
+<path d="M650 795Q1320 400 1990 745" fill="none" stroke="#74baff" stroke-width="9" opacity=".8"/>
+<path d="M780 690Q1370 490 1950 666" fill="none" stroke="#74baff" stroke-opacity="0.06" stroke-width="5"/>
+<path d="M780 713Q1370 513 1950 689" fill="none" stroke="#74baff" stroke-opacity="0.072" stroke-width="5"/>
+<path d="M780 736Q1370 536 1950 712" fill="none" stroke="#74baff" stroke-opacity="0.08399999999999999" stroke-width="5"/>
+<path d="M780 759Q1370 559 1950 735" fill="none" stroke="#74baff" stroke-opacity="0.096" stroke-width="5"/>
+<path d="M780 782Q1370 582 1950 758" fill="none" stroke="#74baff" stroke-opacity="0.108" stroke-width="5"/>
+<path d="M780 805Q1370 605 1950 781" fill="none" stroke="#74baff" stroke-opacity="0.12" stroke-width="5"/>
+<path d="M780 828Q1370 628 1950 804" fill="none" stroke="#74baff" stroke-opacity="0.132" stroke-width="5"/>
+<path d="M780 851Q1370 651 1950 827" fill="none" stroke="#74baff" stroke-opacity="0.14400000000000002" stroke-width="5"/>
+<path d="M780 874Q1370 674 1950 850" fill="none" stroke="#74baff" stroke-opacity="0.156" stroke-width="5"/>
+<path d="M1000 440v300" stroke="#35455a" stroke-width="7"/><path d="M905 442h190" stroke="#d4ebff" stroke-width="15"/><path d="M910 455L740 950H1320L1090 455" fill="#74baff" opacity=".035"/>
+<path d="M1760 440v300" stroke="#35455a" stroke-width="7"/><path d="M1665 442h190" stroke="#d4ebff" stroke-width="15"/><path d="M1670 455L1500 950H2080L1850 455" fill="#74baff" opacity=".035"/>
+<path d="M930 1080L1170 790H1650L1910 1080" fill="#74baff" opacity=".08"/><ellipse cx="1420" cy="985" rx="100" ry="47" fill="none" stroke="#d7eaff" opacity=".3"/>
+<path d="M970 955Q1400 815 1850 940" fill="none" stroke="#dceeff" stroke-width="80" opacity=".18"/>
+<g transform="translate(1400 475)"><path d="M-170-160Q0-225 170-160V30Q155 155 0 225Q-155 155-170 30Z" fill="#102956" stroke="url(#metal)" stroke-width="8"/>
+<path d="M-145-137Q0-193 145-137V30Q130 133 0 194Q-130 133-145 30Z" fill="none" stroke="#74baff" stroke-width="2" opacity=".6"/>
+<path d="M-115-100H115M-95 110H95" stroke="#74baff" stroke-width="2"/>
+<text x="0" y="24" text-anchor="middle" fill="#f7f4e8" font-family="sans-serif" font-size="80" font-weight="900" letter-spacing="5">TOR</text>
+<path d="M-45-65l8-18 8 18 19 2-14 13 4 19-17-9-17 9 4-19-14-13zM20-65l8-18 8 18 19 2-14 13 4 19-17-9-17 9 4-19-14-13z" fill="#74baff"/>
+</g>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#043d2c"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#38d98d" stop-opacity=".5"/><stop offset="1" stop-color="#38d98d" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#38d98d"/><stop offset=".6" stop-color="#043d2c"/><stop offset="1" stop-color="#38d98d"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#38d98d" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<path d="M1010 1080V320" stroke="url(#metal)" stroke-width="11"/>
+<path d="M1016 325Q1240 205 1510 330T1920 330V620Q1700 745 1500 620T1016 620Z" fill="#0d714b" stroke="#7ac997" stroke-opacity=".4"/><path d="M1240 480h310M1290 510h230" stroke="#e9ebca" stroke-width="7" opacity=".7"/>
+<path d="M1200 990V830L1280 760V990M1400 990V650L1480 570V990M1570 990V800L1660 700V990M1750 990V740H1840V990" fill="#0b2926" stroke="#2c7a60" stroke-width="3"/>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

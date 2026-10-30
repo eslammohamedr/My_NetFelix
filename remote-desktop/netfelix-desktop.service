@@ -1,0 +1,13 @@
+[Unit]
+Description=NetFelix Linux desktop host (RustDesk)
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 %h/.local/share/netfelix-tools/rustdesk/linux_session.py
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

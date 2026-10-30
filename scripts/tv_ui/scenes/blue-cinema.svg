@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#07152c"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#61c9ff" stop-opacity=".5"/><stop offset="1" stop-color="#61c9ff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#61c9ff"/><stop offset=".6" stop-color="#07152c"/><stop offset="1" stop-color="#61c9ff"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#61c9ff" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<path d="M1050 480L1920 170V950L1050 590Z" fill="#61c9ff" opacity=".09"/>
+<g transform="translate(1430 500) rotate(-15)"><rect x="-180" y="-80" width="380" height="230" rx="24" fill="#101e37" stroke="#65cfff" stroke-width="4"/><circle cx="-75" cy="-130" r="93" fill="#182b47" stroke="#8cbbd5" stroke-width="5"/><circle cx="100" cy="-130" r="93" fill="#182b47" stroke="#8cbbd5" stroke-width="5"/>
+<circle cx="-25.0" cy="-130.0" r="19" fill="#071222"/>
+<circle cx="-59.54915028125263" cy="-82.44717418524232" r="19" fill="#071222"/>
+<circle cx="-115.45084971874736" cy="-100.61073738537634" r="19" fill="#071222"/>
+<circle cx="-115.45084971874738" cy="-159.38926261462365" r="19" fill="#071222"/>
+<circle cx="-59.549150281252636" cy="-177.55282581475768" r="19" fill="#071222"/>
+<circle cx="150.0" cy="-130.0" r="19" fill="#071222"/>
+<circle cx="115.45084971874738" cy="-82.44717418524232" r="19" fill="#071222"/>
+<circle cx="59.549150281252636" cy="-100.61073738537634" r="19" fill="#071222"/>
+<circle cx="59.54915028125262" cy="-159.38926261462365" r="19" fill="#071222"/>
+<circle cx="115.45084971874736" cy="-177.55282581475768" r="19" fill="#071222"/>
+<path d="M200-20l110-55v175L200 45Z" fill="#254868"/><path d="M-70 150l-90 250M70 150l90 250" stroke="#35516d" stroke-width="12"/></g>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

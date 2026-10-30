@@ -1,0 +1,66 @@
+Starting a Gradle Daemon (subsequent builds will be faster)
+Warning: SDK processing. This version only understands SDK XML versions up to 3 but an SDK XML file of version 4 was encountered. This can happen if you use versions of Android Studio and the command-line tools that were released at different times.
+> Task :phone:preBuild UP-TO-DATE
+> Task :phone:preDebugBuild UP-TO-DATE
+> Task :phone:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :phone:javaPreCompileDebug UP-TO-DATE
+> Task :phone:checkDebugAarMetadata UP-TO-DATE
+> Task :phone:generateDebugResValues UP-TO-DATE
+> Task :phone:mapDebugSourceSetPaths UP-TO-DATE
+> Task :phone:generateDebugResources UP-TO-DATE
+> Task :phone:mergeDebugResources UP-TO-DATE
+> Task :phone:packageDebugResources UP-TO-DATE
+> Task :phone:parseDebugLocalResources UP-TO-DATE
+> Task :phone:createDebugCompatibleScreenManifests
+> Task :phone:extractDeepLinksDebug UP-TO-DATE
+> Task :phone:processDebugMainManifest
+> Task :phone:processDebugManifest
+> Task :phone:mergeDebugShaders UP-TO-DATE
+> Task :phone:compileDebugShaders NO-SOURCE
+> Task :phone:generateDebugAssets UP-TO-DATE
+> Task :phone:mergeDebugAssets UP-TO-DATE
+> Task :phone:compressDebugAssets UP-TO-DATE
+> Task :phone:processDebugJavaRes NO-SOURCE
+> Task :phone:mergeDebugJavaResource UP-TO-DATE
+> Task :phone:checkDebugDuplicateClasses UP-TO-DATE
+> Task :phone:desugarDebugFileDependencies UP-TO-DATE
+> Task :phone:mergeExtDexDebug UP-TO-DATE
+> Task :phone:mergeLibDexDebug UP-TO-DATE
+> Task :phone:mergeDebugJniLibFolders UP-TO-DATE
+> Task :phone:mergeDebugNativeLibs NO-SOURCE
+> Task :phone:stripDebugDebugSymbols NO-SOURCE
+> Task :phone:validateSigningDebug UP-TO-DATE
+> Task :phone:writeDebugAppMetadata UP-TO-DATE
+> Task :phone:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :phone:preDebugAndroidTestBuild SKIPPED
+> Task :phone:generateDebugAndroidTestResValues UP-TO-DATE
+> Task :phone:processDebugManifestForPackage
+> Task :phone:extractProguardFiles UP-TO-DATE
+> Task :phone:preDebugUnitTestBuild UP-TO-DATE
+> Task :phone:processDebugResources
+
+> Task :phone:compileDebugJavaWithJavac
+Note: /home/dell/Desktop/My_NetFelix/watch-remote/phone/src/main/java/com/netfelix/companion/MainActivity.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+
+> Task :phone:dexBuilderDebug
+> Task :phone:bundleDebugClassesToCompileJar
+> Task :phone:generateDebugLintReportModel
+> Task :phone:generateDebugAndroidTestLintModel
+> Task :phone:generateDebugUnitTestLintModel
+> Task :phone:mergeProjectDexDebug
+> Task :phone:packageDebug
+> Task :phone:createDebugApkListingFileRedirect
+> Task :phone:assembleDebug
+> Task :phone:lintAnalyzeDebug
+> Task :phone:lintAnalyzeDebugAndroidTest
+> Task :phone:lintAnalyzeDebugUnitTest
+
+> Task :phone:lintReportDebug
+Wrote HTML report to file:///home/dell/Desktop/My_NetFelix/watch-remote/phone/build/reports/lint-results-debug.html
+
+> Task :phone:lintDebug
+[Incubating] Problems report is available at: file:///home/dell/Desktop/My_NetFelix/watch-remote/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 1m 30s
+42 actionable tasks: 19 executed, 23 up-to-date

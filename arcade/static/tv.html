@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎮 NetFelix Retro Arcade 4K</title>
+
+  <script>
+    // Early TV WebSocket Logger & Error Monitor
+    (function() {
+      try {
+        var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var ws = new WebSocket(proto + '//' + location.host + '/ws?role=tv&room=main');
+        window.__earlyWs = ws;
+        window.sendTvLog = function(msg) {
+          console.log('[TV]', msg);
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            try { ws.send(JSON.stringify({ type: 'tv_log', msg: String(msg) })); } catch(e) {}
+          }
+        };
+        ws.onopen = function() {
+          window.sendTvLog('TV Early WS Connected. UA: ' + navigator.userAgent);
+        };
+        window.onerror = function(msg, url, line, col, err) {
+          var details = 'GLOBAL ERROR: ' + msg + ' at ' + url + ':' + line + ':' + col;
+          if (err && err.stack) details += '\nStack: ' + err.stack;
+          window.sendTvLog(details);
+        };
+        window.onunhandledrejection = function(e) {
+          window.sendTvLog('GLOBAL REJECTION: ' + (e.reason ? (e.reason.stack || e.reason) : e));
+        };
+      } catch(e) {}
+    })();
+  </script>
+
+  <!-- Nostalgist Emulator Engine & QR Code Generator -->
+  <script src="/static/vendor/nostalgist.js?v=20261019_es6"></script>
+  <script src="/static/vendor/qrcode.min.js?v=20261019"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: #080b11;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Cairo', sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Ambient Navigation Bar */
+    header {
+      height: 90px;
+      padding: 0 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(20, 26, 38, 0.95) 0%, rgba(8, 11, 17, 0.8) 100%);
+      border-bottom: 2px solid rgba(229, 9, 20, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      z-index: 20;
+    }
+
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-logo {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(90deg, #ff2a38 0%, #ff758c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 25px rgba(229, 9, 20, 0.5);
+    }
+
+    .brand-subtitle {
+      font-size: 14px;
+      color: #8fa0b5;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    /* Player Status Cards */
+    .players-status {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .player-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .player-card.p1 { border-color: rgba(229, 9, 20, 0.4); }
+    .player-card.p2 { border-color: rgba(0, 112, 243, 0.4); }
+
+    .status-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #555;
+      box-shadow: 0 0 8px #555;
+    }
+
+    .status-dot.active {
+      background: #00e676;
+      box-shadow: 0 0 14px #00e676;
+    }
+
+    /* Top Action Buttons (Refresh & Close) */
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .btn-header {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 9px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+
+    .btn-header:hover, .btn-header:focus, .btn-header.focused {
+      background: rgba(255, 255, 255, 0.22);
+      border-color: #fff;
+      transform: scale(1.04);
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.35);
+      outline: none;
+    }
+
+    .btn-header.danger {
+      background: rgba(229, 9, 20, 0.2);
+      border-color: rgba(229, 9, 20, 0.5);
+      color: #ff9199;
+    }
+
+    .btn-header.danger:hover, .btn-header.danger:focus, .btn-header.danger.focused {
+      background: #e50914;
+      border-color: #ff4d58;
+      color: #fff;
+      box-shadow: 0 0 22px rgba(229, 9, 20, 0.7);
+    }
+
+    /* Main Content Area */
+    main {
+      flex: 1;
+      display: flex;
+      padding: 30px 40px;
+      gap: 40px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Games Catalog View */
+    #catalogView {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      gap: 40px;
+    }
+
+    /* Left Side: Game Carousel & Grid */
+    .games-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      overflow-y: auto;
+      padding: 10px 4px;
+      max-height: 520px;
+    }
+
+    .game-card {
+      position: relative;
+      background: #131822;
+      border-radius: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .game-card:hover, .game-card.focused {
+      transform: scale(1.06) translateY(-6px);
+      border-color: #ff2a38;
+      box-shadow: 0 16px 35px rgba(229, 9, 20, 0.45);
+      outline: none;
+    }
+
+    .game-cover-box {
+      width: 100%;
+      height: 150px;
+      background: #1e2533;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .game-cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .game-info {
+      padding: 12px 14px;
+    }
+
+    .game-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .game-tags {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #a0aec0;
+    }
+
+    .tag.system {
+      background: #e5091433;
+      color: #ff758c;
+    }
+
+    /* Right Side: QR Code & Connection Hub */
+    .qr-hub {
+      width: 360px;
+      background: linear-gradient(160deg, #161b26 0%, #0d111a 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .qr-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+
+    .qr-desc {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .qr-box {
+      background: #fff;
+      padding: 14px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      margin-bottom: 20px;
+    }
+
+    .qr-link-url {
+      font-family: monospace;
+      font-size: 13px;
+      color: #00e676;
+      background: rgba(0, 230, 118, 0.1);
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(0, 230, 118, 0.3);
+      margin-bottom: 16px;
+      direction: ltr;
+    }
+
+    .nav-hints {
+      margin-top: auto;
+      padding: 14px 16px;
+      width: 100%;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      font-size: 12px;
+      color: #8fa0b5;
+      text-align: right;
+      line-height: 1.6;
+    }
+
+    /* Game Play View (Full Screen) */
+    #gameView {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 50;
+    }
+
+    #emulatorContainer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, #0e1219 0%, #000 100%);
+    }
+
+    #emulatorContainer canvas {
+      height: 98vh !important;
+      aspect-ratio: 4 / 3 !important;
+      width: auto !important;
+      max-width: 98vw;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 0 70px rgba(0, 0, 0, 0.95), 0 0 25px rgba(41, 121, 255, 0.18);
+      image-rendering: auto !important;
+      transition: all 0.25s ease;
+    }
+
+    #emulatorContainer.stretch-16-9 canvas {
+      aspect-ratio: 16 / 9 !important;
+      width: 100vw !important;
+      max-width: 100vw !important;
+      height: 100vh !important;
+      border-radius: 0;
+    }
+
+    #emulatorContainer.filter-pixelated canvas {
+      image-rendering: pixelated !important;
+    }
+
+    /* In-game floating HUD */
+    .ingame-hud {
+      position: absolute;
+      top: 20px;
+      right: 25px;
+      display: flex;
+      gap: 12px;
+      z-index: 60;
+      opacity: 0.85;
+      transition: opacity 0.3s;
+    }
+    .ingame-hud:hover { opacity: 1; }
+
+    .hud-badge {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Pause Menu Overlay */
+    #pauseMenu {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      z-index: 80;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pause-card {
+      background: #141a24;
+      border: 2px solid rgba(229, 9, 20, 0.5);
+      border-radius: 24px;
+      padding: 36px 48px;
+      width: 450px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8);
+    }
+
+    .pause-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 24px;
+    }
+
+    .menu-btn {
+      display: block;
+      width: 100%;
+      padding: 14px 20px;
+      margin-bottom: 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .menu-btn:hover, .menu-btn.focused {
+      background: #e50914;
+      border-color: #ff4d58;
+      box-shadow: 0 0 20px rgba(229, 9, 20, 0.6);
+      transform: scale(1.03);
+    }
+
+    /* Loading Spinner */
+    #loadingOverlay {
+      display: none;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 70;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 5px solid rgba(255, 255, 255, 0.1);
+      border-top-color: #e50914;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header>
+    <div class="brand-title">
+      <div class="brand-logo">🎮 NETFELIX ARCADE</div>
+      <div class="brand-subtitle">شاشة الألعاب الكلاسيكية • تحكم فائق بالهاتف</div>
+    </div>
+
+    <div class="header-controls">
+      <div class="players-status">
+        <div class="player-card p1">
+          <div id="dotP1" class="status-dot"></div>
+          <span>لاعب 1 (P1)</span>
+        </div>
+        <div class="player-card p2">
+          <div id="dotP2" class="status-dot"></div>
+          <span>لاعب 2 (P2)</span>
+        </div>
+      </div>
+
+      <button class="btn-header" onclick="forceAppRefresh()" title="إعادة تحميل وتحديث التطبيق" tabindex="0">
+        🔄 تحديث
+      </button>
+      <button class="btn-header danger" onclick="closeApp()" title="إغلاق التطبيق والخروج" tabindex="0">
+        ❌ إغلاق
+      </button>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main>
+    <!-- Catalog View -->
+    <div id="catalogView">
+      <div class="games-section">
+        <div class="section-title">
+          <span>🕹️ اختر لعبة للبدء (اضغط OK في الريموت)</span>
+        </div>
+        <div class="games-grid" id="gamesGrid">
+          <!-- Populated dynamically via JS -->
+        </div>
+      </div>
+
+      <!-- QR Code Controller Connect Hub -->
+      <div class="qr-hub">
+        <div class="qr-title">📱 حول هاتفك لدراع تحكم</div>
+        <div class="qr-desc">امسح الكود بكاميرا الموبايل لفتح دراع التحكم فوراً بدون أي برامج:</div>
+
+        <div class="qr-box" id="qrcode"></div>
+
+        <div class="qr-link-url" id="padUrlText">http://192.168.1.15:8095/pad</div>
+
+        <div class="nav-hints">
+          • <b>بالريموت:</b> استخدم الأسهم للتنقل وزر OK للاختيار.<br>
+          • <b>بالهاتف:</b> استجابة فائقة السرعة مع اهتزاز فيزيائي.<br>
+          • <b>لاعب ثانٍ:</b> يمكن لشخص آخر مسح الكود للعب معاً!
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Game View -->
+    <div id="gameView">
+      <div class="ingame-hud">
+        <button class="hud-badge" id="hudAspectBtn" onclick="toggleAspectRatio()" style="cursor: pointer;" title="تبديل نسبة العرض">
+          📺 4:3 أصلي
+        </button>
+        <button class="hud-badge" id="hudFilterBtn" onclick="toggleImageFilter()" style="cursor: pointer;" title="تبديل فلتر النعومة/البكسل">
+          ✨ ناعم HD
+        </button>
+        <button class="hud-badge" onclick="showPauseMenu()" style="cursor: pointer;">
+          ⏸️ القائمة
+        </button>
+      </div>
+      <div id="emulatorContainer">
+        <canvas id="emulatorCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Pause Menu -->
+    <div id="pauseMenu">
+      <div class="pause-card">
+        <div class="pause-title">⏸️ إيقاف مؤقت</div>
+        <button class="menu-btn focused" onclick="resumeGame()">▶️ متابعة اللعب</button>
+        <button class="menu-btn" id="menuAspectBtn" onclick="toggleAspectRatio()">📺 أبعاد الشاشة: 4:3 (أصلي)</button>
+        <button class="menu-btn" id="menuFilterBtn" onclick="toggleImageFilter()">✨ فلتر الصورة: ناعم HD</button>
+        <button class="menu-btn" onclick="restartGame()">🔄 إعادة تشغيل اللعبة</button>
+        <button class="menu-btn" onclick="saveState()">💾 حفظ المرحلة (Save)</button>
+        <button class="menu-btn" onclick="loadState()">📂 تحميل المرحلة (Load)</button>
+        <button class="menu-btn" onclick="exitToCatalog()">🚪 خروج لمكتبة الألعاب</button>
+        <button class="menu-btn" onclick="forceAppRefresh()">🔄 تحديث التطبيق بالكامل</button>
+        <button class="menu-btn" onclick="closeApp()" style="background: rgba(229,9,20,0.3); border-color: #e50914; color: #ff858d;">❌ إغلاق التطبيق والخروج</button>
+      </div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <div style="font-size: 20px; font-weight: 700; color: #fff;" id="loadingText">جاري تحميل اللعبة...</div>
+    </div>
+
+    <!-- Error Modal for TV -->
+    <div id="errorModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center;">
+      <div style="background: #1e2430; border: 2px solid #e50914; border-radius: 16px; padding: 30px 40px; max-width: 600px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+        <div style="font-size: 32px; margin-bottom: 15px;">⚠️ تنبيه</div>
+        <div id="errorModalText" style="font-size: 16px; color: #cbd5e1; line-height: 1.6; margin-bottom: 25px; white-space: pre-wrap;"></div>
+        <button id="errorModalBtn" onclick="dismissErrorModal()" style="background: #e50914; color: #fff; border: none; padding: 12px 30px; font-size: 16px; font-weight: 700; border-radius: 8px; cursor: pointer;">رجوع لمكتبة الألعاب</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // TV Log Helper
+    function sendTvLog(msg) {
+      console.log('[TV]', msg);
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try {
+          ws.send(JSON.stringify({ type: 'tv_log', msg: String(msg) }));
+        } catch (e) {}
+      }
+    }
+
+    window.onerror = function(msg, url, line, col, err) {
+      sendTvLog(`ERROR: ${msg} (${url}:${line}:${col})`);
+    };
+    window.onunhandledrejection = function(e) {
+      sendTvLog(`REJECTION: ${e.reason ? (e.reason.stack || e.reason) : e}`);
+    };
+
+    function showErrorOnScreen(text) {
+      const modal = document.getElementById('errorModal');
+      const textEl = document.getElementById('errorModalText');
+      if (modal && textEl) {
+        textEl.innerText = text;
+        modal.style.display = 'flex';
+        const btn = document.getElementById('errorModalBtn');
+        if (btn) btn.focus();
+      }
+    }
+
+    function dismissErrorModal() {
+      const modal = document.getElementById('errorModal');
+      if (modal) modal.style.display = 'none';
+      exitToCatalog();
+    }
+
+    // App Control: Force Refresh & Exit
+    function forceAppRefresh() {
+      sendTvLog('Executing forceAppRefresh...');
+      const url = window.location.origin + window.location.pathname + '?_t=' + Date.now();
+      window.location.replace(url);
+    }
+
+    function closeApp() {
+      sendTvLog('Executing closeApp...');
+      if (typeof tizen !== 'undefined' && tizen.application) {
+        try {
+          tizen.application.getCurrentApplication().exit();
+          return;
+        } catch (e) {
+          sendTvLog('Tizen application exit error: ' + e);
+        }
+      }
+      try {
+        window.close();
+      } catch (e) {}
+      window.location.replace("about:blank");
+    }
+
+    // State
+    let gamesList = [];
+    let focusedIndex = 0;
+    let isPlaying = false;
+    let isPaused = false;
+    let nostalgist = null;
+    let currentGame = null;
+
+    // WebSocket Gateway
+    let ws = window.__earlyWs || null;
+    const dotP1 = document.getElementById('dotP1');
+    const dotP2 = document.getElementById('dotP2');
+
+    function connectWs() {
+      if (!ws || ws.readyState === WebSocket.CLOSED) {
+        const host = window.location.host;
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${host}/ws?role=tv&room=main`;
+        ws = new WebSocket(wsUrl);
+      }
+
+      ws.onopen = () => {
+        sendTvLog('TV Connected to Arcade WebSocket');
+      };
+
+      ws.onclose = () => {
+        setTimeout(connectWs, 2000);
+      };
+
+      ws.onmessage = (e) => {
+        try {
+          const msg = JSON.parse(e.data);
+          handleWsMessage(msg);
+        } catch (err) {
+          console.error('WS Error:', err);
+        }
+      };
+    }
+
+    let isStretch169 = false;
+    let isPixelated = false;
+
+    function toggleAspectRatio() {
+      isStretch169 = !isStretch169;
+      const container = document.getElementById('emulatorContainer');
+      if (container) container.classList.toggle('stretch-16-9', isStretch169);
+      const text = isStretch169 ? '📺 16:9 شاشة كاملة' : '📺 4:3 أصلي';
+      const hudBtn = document.getElementById('hudAspectBtn');
+      if (hudBtn) hudBtn.innerText = text;
+      const menuBtn = document.getElementById('menuAspectBtn');
+      if (menuBtn) menuBtn.innerText = '📺 أبعاد الشاشة: ' + (isStretch169 ? '16:9 كامل' : '4:3 أصلي');
+      sendTvLog('Toggled Aspect Ratio. Stretch 16:9 = ' + isStretch169);
+    }
+
+    function toggleImageFilter() {
+      isPixelated = !isPixelated;
+      const container = document.getElementById('emulatorContainer');
+      if (container) container.classList.toggle('filter-pixelated', isPixelated);
+      const text = isPixelated ? '👾 بكسل حاد' : '✨ ناعم HD';
+      const hudBtn = document.getElementById('hudFilterBtn');
+      if (hudBtn) hudBtn.innerText = text;
+      const menuBtn = document.getElementById('menuFilterBtn');
+      if (menuBtn) menuBtn.innerText = '✨ فلتر الصورة: ' + (isPixelated ? 'بكسل حاد' : 'ناعم HD');
+      sendTvLog('Toggled Image Filter. Pixelated = ' + isPixelated);
+    }
+
+    function handleWsMessage(msg) {
+      if (msg.type === 'tv_cmd') {
+        sendTvLog('Received tv_cmd from controller: ' + msg.command);
+        if (msg.command === 'reload') {
+          forceAppRefresh();
+        } else if (msg.command === 'close') {
+          closeApp();
+        } else if (msg.command === 'pause_toggle') {
+          if (isPlaying) {
+            isPaused ? resumeGame() : showPauseMenu();
+          }
+        } else if (msg.command === 'aspect_toggle') {
+          toggleAspectRatio();
+        } else if (msg.command === 'filter_toggle') {
+          toggleImageFilter();
+        }
+        return;
+      }
+
+      if (msg.type === 'state') {
+        dotP1.classList.toggle('active', Boolean(msg.p1));
+        dotP2.classList.toggle('active', Boolean(msg.p2));
+      } else if (msg.type === 'player_connected') {
+        if (msg.player === 1) dotP1.classList.add('active');
+        if (msg.player === 2) dotP2.classList.add('active');
+      } else if (msg.type === 'player_disconnected') {
+        if (msg.player === 1) dotP1.classList.remove('active');
+        if (msg.player === 2) dotP2.classList.remove('active');
+      } else if (msg.type === 'input') {
+        const action = msg.action; // 'down' or 'up'
+        const btn = msg.button;    // 'a', 'b', 'up', 'down', 'left', 'right', 'start', 'select', 'x', 'y', 'l', 'r'
+        const player = msg.player; // 1 or 2
+
+        // CASE 1: In Active Game (Not Paused) -> Send directly to Nostalgist
+        if (isPlaying && !isPaused && nostalgist) {
+          if (action === 'down') {
+            nostalgist.pressDown({ button: btn, player: player });
+          } else if (action === 'up') {
+            nostalgist.pressUp({ button: btn, player: player });
+          }
+          return;
+        }
+
+        // For UI & Menu navigation, only respond to keydown (action === 'down') to prevent double-skipping
+        if (action !== 'down') return;
+
+        // CASE 2: In Pause Menu
+        if (isPaused) {
+          const buttons = Array.from(document.querySelectorAll('#pauseMenu .menu-btn'));
+          if (!buttons.length) return;
+          let cur = buttons.findIndex(b => b.classList.contains('focused'));
+          if (cur === -1) cur = 0;
+
+          if (btn === 'up') {
+            buttons[cur].classList.remove('focused');
+            cur = (cur - 1 + buttons.length) % buttons.length;
+            buttons[cur].classList.add('focused');
+          } else if (btn === 'down') {
+            buttons[cur].classList.remove('focused');
+            cur = (cur + 1) % buttons.length;
+            buttons[cur].classList.add('focused');
+          } else if (btn === 'a' || btn === 'b' || btn === 'start') {
+            buttons[cur].click();
+          } else if (btn === 'select' || btn === 'x' || btn === 'y') {
+            resumeGame();
+          }
+          return;
+        }
+
+        // CASE 3: In Error Modal
+        const errorModal = document.getElementById('errorModal');
+        if (errorModal && errorModal.style.display === 'flex') {
+          if (btn === 'a' || btn === 'b' || btn === 'start') {
+            dismissErrorModal();
+          }
+          return;
+        }
+
+        // CASE 4: In Catalog View (Game Library)
+        if (!isPlaying) {
+          const cards = document.querySelectorAll('.game-card');
+          if (!cards.length) return;
+
+          if (btn === 'left') { // In RTL, left moves forward
+            focusedIndex = (focusedIndex + 1) % cards.length;
+            updateCardFocus(cards);
+          } else if (btn === 'right') { // In RTL, right moves back
+            focusedIndex = (focusedIndex - 1 + cards.length) % cards.length;
+            updateCardFocus(cards);
+          } else if (btn === 'down') {
+            if (focusedIndex + 4 < cards.length) {
+              focusedIndex += 4;
+            } else {
+              focusedIndex = cards.length - 1;
+            }
+            updateCardFocus(cards);
+          } else if (btn === 'up') {
+            if (focusedIndex - 4 >= 0) {
+              focusedIndex -= 4;
+            } else {
+              focusedIndex = 0;
+            }
+            updateCardFocus(cards);
+          } else if (btn === 'a' || btn === 'b' || btn === 'start') {
+            if (cards[focusedIndex]) {
+              cards[focusedIndex].click();
+            }
+          }
+        }
+      }
+    }
+
+    // Generate Dynamic QR Code
+    function initQRCode() {
+      const host = window.location.host;
+      const padUrl = `http://${host}/pad`;
+      document.getElementById('padUrlText').innerText = padUrl;
+
+      new QRCode(document.getElementById('qrcode'), {
+        text: padUrl,
+        width: 170,
+        height: 170,
+        colorDark: '#0a0d14',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // Load Games from API
+    async function loadGames() {
+      try {
+        const res = await fetch('/api/games');
+        const data = await res.json();
+        gamesList = data.games || [];
+        renderGamesGrid();
+      } catch (err) {
+        console.error('Failed to load games:', err);
+      }
+    }
+
+    function renderGamesGrid() {
+      const grid = document.getElementById('gamesGrid');
+      grid.innerHTML = '';
+
+      gamesList.forEach((game, idx) => {
+        const card = document.createElement('div');
+        card.className = 'game-card' + (idx === 0 ? ' focused' : '');
+        card.tabIndex = 0;
+        card.dataset.index = idx;
+
+        const coverSrc = game.cover ? `/covers/${game.cover}` : '/covers/31in1realgame-multicart.png';
+
+        card.innerHTML = `
+          <div class="game-cover-box">
+            <img class="game-cover-img" src="${coverSrc}" alt="${game.title}" onerror="this.src='/covers/31in1realgame-multicart.png'">
+          </div>
+          <div class="game-info">
+            <div class="game-title">${game.title}</div>
+            <div class="game-tags">
+              <span class="tag system">${game.system}</span>
+              <span class="tag">${game.players === 2 ? 'لاعبان 👥' : 'لاعب 👤'}</span>
+            </div>
+          </div>
+        `;
+
+        card.addEventListener('click', () => launchGame(game));
+        grid.appendChild(card);
+      });
+    }
+
+    // Helper: Fetch with progress display
+    async function fetchWithProgress(url, onProgress) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`فشل التحميل من السيرفر (${response.status})`);
+      const contentLength = response.headers.get('content-length');
+      if (!contentLength || !response.body || !response.body.getReader) {
+        return await response.blob();
+      }
+
+      const total = parseInt(contentLength, 10);
+      let loaded = 0;
+      const reader = response.body.getReader();
+      const chunks = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (onProgress && total > 0) {
+          const pct = Math.round((loaded / total) * 100);
+          const loadedMb = (loaded / (1024 * 1024)).toFixed(1);
+          const totalMb = (total / (1024 * 1024)).toFixed(1);
+          onProgress(pct, loadedMb, totalMb);
+        }
+      }
+      return new Blob(chunks);
+    }
+
+    // Launch Game via Nostalgist.js
+    async function launchGame(game) {
+      currentGame = game;
+      const loadingOverlay = document.getElementById('loadingOverlay');
+      const loadingText = document.getElementById('loadingText');
+      loadingOverlay.style.display = 'flex';
+      loadingText.innerText = `جاري تجهيز ${game.title}...`;
+
+      sendTvLog(`Starting launchGame for: ${game.title} (${game.file})`);
+
+      try {
+        if (typeof Nostalgist === 'undefined') {
+          throw new Error('محرك الألعاب (Nostalgist) لم يكتمل تحميله على المتصفح. يرجى إعادة تحديث الصفحة.');
+        }
+
+        if (nostalgist) {
+          try {
+            await nostalgist.exit({ removeCanvas: false });
+          } catch (e) {
+            console.warn('Exit previous session:', e);
+          }
+          nostalgist = null;
+        }
+
+        // Reset emulator container with a fresh canvas
+        const container = document.getElementById('emulatorContainer');
+        container.innerHTML = '<canvas id="emulatorCanvas"></canvas>';
+        const canvasEl = document.getElementById('emulatorCanvas');
+
+        document.getElementById('catalogView').style.display = 'none';
+        document.getElementById('gameView').style.display = 'block';
+
+        // Fetch ROM with streaming progress
+        loadingText.innerText = `جاري تحميل ${game.title}...`;
+        const romBlob = await fetchWithProgress(`/games/${game.file}`, (pct, curMb, totalMb) => {
+          loadingText.innerText = `جاري تحميل ${game.title} (${pct}% - ${curMb} / ${totalMb} MB)...`;
+        });
+
+        sendTvLog(`ROM blob ready (${(romBlob.size / 1024 / 1024).toFixed(2)} MB). Initializing Nostalgist...`);
+
+        const launchOptions = {
+          core: game.core || 'fceumm',
+          rom: {
+            fileName: game.file,
+            fileContent: romBlob
+          },
+          size: { width: 1440, height: 1080 },
+          style: { imageRendering: 'auto' },
+          resolveCoreJs(core) {
+            return `/static/vendor/cores/${core}_libretro.js?v=20261019`;
+          },
+          resolveCoreWasm(core) {
+            return `/static/vendor/cores/${core}_libretro.wasm?v=20261019`;
+          },
+          element: canvasEl,
+          retroarchConfig: {
+            video_smooth: true,
+            video_crop_overscan: true,
+            aspect_ratio_index: 0,
+            video_aspect_ratio_auto: false,
+            video_scale_integer: false,
+            input_player1_analog_dpad_mode: 1,
+            input_player2_analog_dpad_mode: 1,
+            // Full Player 1 mapping
+            input_player1_a: 'x',
+            input_player1_b: 'z',
+            input_player1_x: 's',
+            input_player1_y: 'a',
+            input_player1_start: 'enter',
+            input_player1_select: 'rshift',
+            input_player1_up: 'up',
+            input_player1_down: 'down',
+            input_player1_left: 'left',
+            input_player1_right: 'right',
+            input_player1_l: 'q',
+            input_player1_r: 'w',
+            // Full Player 2 mapping
+            input_player2_a: 'k',
+            input_player2_b: 'j',
+            input_player2_x: 'i',
+            input_player2_y: 'u',
+            input_player2_start: 'p',
+            input_player2_select: 'o',
+            input_player2_up: 't',
+            input_player2_down: 'g',
+            input_player2_left: 'f',
+            input_player2_right: 'h',
+            input_player2_l: 'y',
+            input_player2_r: 'e',
+          }
+        };
+
+        // If PlayStation 1, provide official SCPH-5501 BIOS & core audio/video enhancements
+        if (game.system === 'PS1' || game.core === 'pcsx_rearmed') {
+          loadingText.innerText = 'جاري إعداد محرك PlayStation والبيوس...';
+          launchOptions.retroarchCoreConfig = {
+            pcsx_rearmed_dithering: 'enabled',
+            pcsx_rearmed_spu_interpolation: 'gaussian',
+            pcsx_rearmed_show_overscan: 'disabled',
+            pcsx_rearmed_frameskip: '0'
+          };
+          try {
+            const biosRes = await fetch('/bios/scph5501.bin');
+            if (biosRes.ok) {
+              const biosBlob = await biosRes.blob();
+              launchOptions.bios = [{
+                fileName: 'scph5501.bin',
+                fileContent: biosBlob
+              }];
+            }
+          } catch (e) {
+            console.warn('BIOS fetch warning:', e);
+          }
+        }
+
+        loadingText.innerText = 'جاري تشغيل محاكي اللعبة...';
+        nostalgist = await Nostalgist.launch(launchOptions);
+
+        sendTvLog(`Nostalgist launch completed successfully for ${game.title}`);
+
+        isPlaying = true;
+        isPaused = false;
+        loadingOverlay.style.display = 'none';
+
+      } catch (err) {
+        sendTvLog(`FATAL launchGame error: ${err.stack || err.message}`);
+        console.error('Failed to launch game:', err);
+        loadingOverlay.style.display = 'none';
+        showErrorOnScreen(`تعذر تشغيل اللعبة:\n${err.message || err}`);
+      }
+    }
+
+    // In-game Pause & Controls
+    function showPauseMenu() {
+      if (!isPlaying) return;
+      isPaused = true;
+      if (nostalgist) {
+        try { nostalgist.pause(); } catch (e) {}
+      }
+      const menu = document.getElementById('pauseMenu');
+      menu.style.display = 'flex';
+      const buttons = menu.querySelectorAll('.menu-btn');
+      buttons.forEach((b, i) => b.classList.toggle('focused', i === 0));
+    }
+
+    function resumeGame() {
+      isPaused = false;
+      document.getElementById('pauseMenu').style.display = 'none';
+      if (nostalgist) {
+        try { nostalgist.resume(); } catch (e) {}
+      }
+    }
+
+    async function restartGame() {
+      if (currentGame) {
+        resumeGame();
+        await launchGame(currentGame);
+      }
+    }
+
+    async function saveState() {
+      if (nostalgist) {
+        try {
+          await nostalgist.saveState();
+          alert('تم حفظ المرحلة بنجاح! 💾');
+        } catch (e) {
+          alert('فشل حفظ المرحلة: ' + e.message);
+        }
+      }
+    }
+
+    async function loadState() {
+      if (nostalgist) {
+        try {
+          await nostalgist.loadState();
+          resumeGame();
+        } catch (e) {
+          alert('فشل تحميل المرحلة: ' + e.message);
+        }
+      }
+    }
+
+    async function exitToCatalog() {
+      isPlaying = false;
+      isPaused = false;
+      document.getElementById('pauseMenu').style.display = 'none';
+      document.getElementById('gameView').style.display = 'none';
+      document.getElementById('catalogView').style.display = 'flex';
+      document.getElementById('loadingOverlay').style.display = 'none';
+
+      if (nostalgist) {
+        try {
+          await nostalgist.exit({ removeCanvas: false });
+        } catch (e) {
+          console.warn('Exit error:', e);
+        }
+        nostalgist = null;
+      }
+      const container = document.getElementById('emulatorContainer');
+      if (container) container.innerHTML = '';
+    }
+
+    // Samsung TV Remote & Keyboard Navigation
+    window.addEventListener('keydown', (e) => {
+      const key = e.keyCode || e.which;
+
+      // Handle Back Button (10009 on Samsung Tizen remote, 27 on PC Esc)
+      if (key === 10009 || key === 27) {
+        e.preventDefault();
+        if (isPlaying) {
+          if (isPaused) {
+            resumeGame();
+          } else {
+            showPauseMenu();
+          }
+        } else {
+          closeApp();
+        }
+        return;
+      }
+
+      // If in pause menu, navigate buttons
+      if (isPaused) {
+        const buttons = Array.from(document.querySelectorAll('#pauseMenu .menu-btn'));
+        if (!buttons.length) return;
+        let cur = buttons.findIndex(b => b.classList.contains('focused'));
+        if (cur === -1) cur = 0;
+        if (key === 38) { // Up
+          e.preventDefault();
+          buttons[cur].classList.remove('focused');
+          cur = (cur - 1 + buttons.length) % buttons.length;
+          buttons[cur].classList.add('focused');
+        } else if (key === 40) { // Down
+          e.preventDefault();
+          buttons[cur].classList.remove('focused');
+          cur = (cur + 1) % buttons.length;
+          buttons[cur].classList.add('focused');
+        } else if (key === 13) { // Enter
+          e.preventDefault();
+          buttons[cur].click();
+        }
+        return;
+      }
+
+      // If in Catalog view, navigate game cards
+      if (!isPlaying) {
+        const cards = document.querySelectorAll('.game-card');
+        if (!cards.length) return;
+
+        if (key === 37) { // Left (in RTL, goes to next)
+          e.preventDefault();
+          focusedIndex = (focusedIndex + 1) % cards.length;
+          updateCardFocus(cards);
+        } else if (key === 39) { // Right (in RTL, goes to prev)
+          e.preventDefault();
+          focusedIndex = (focusedIndex - 1 + cards.length) % cards.length;
+          updateCardFocus(cards);
+        } else if (key === 40) { // Down (move down a row of 4)
+          e.preventDefault();
+          if (focusedIndex + 4 < cards.length) {
+            focusedIndex += 4;
+            updateCardFocus(cards);
+          }
+        } else if (key === 38) { // Up (move up a row of 4)
+          e.preventDefault();
+          if (focusedIndex - 4 >= 0) {
+            focusedIndex -= 4;
+            updateCardFocus(cards);
+          }
+        } else if (key === 13) { // Enter / OK
+          e.preventDefault();
+          if (cards[focusedIndex]) {
+            cards[focusedIndex].click();
+          }
+        }
+      }
+    });
+
+    function updateCardFocus(cards) {
+      cards.forEach((c, i) => {
+        if (i === focusedIndex) {
+          c.classList.add('focused');
+          c.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+          c.classList.remove('focused');
+        }
+      });
+    }
+
+    // Register Tizen TV Remote Keys if on Samsung TV
+    if (window.tizen && tizen.tvinputdevice) {
+      try {
+        tizen.tvinputdevice.registerKey('Return');
+        tizen.tvinputdevice.registerKey('Exit');
+      } catch (err) {}
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', () => {
+      initQRCode();
+      loadGames();
+      connectWs();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#0b1825"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#edbd69" stop-opacity=".5"/><stop offset="1" stop-color="#edbd69" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#edbd69"/><stop offset=".6" stop-color="#0b1825"/><stop offset="1" stop-color="#edbd69"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#edbd69" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<circle cx="1440" cy="230" r="90" fill="#edbd69" opacity=".12"/>
+<path d="M760 850Q1320 740 1920 840V1080H700Z" fill="#061019"/>
+<path d="M1090 800V470h28v330m-38-330h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#edbd69" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1680 800V450h28v330m-38-350h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#edbd69" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1835 800V560h28v330m-38-240h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#edbd69" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1220 570l230-40 175 85v230l-190 48-215-92z" fill="#101319" stroke="#bb9f66" stroke-width="3"/>
+<path d="M1220 615l215 20 190-45v35l-190 45-215-20z" fill="#bd9a54"/><path d="M1435 635v258" stroke="#383535" stroke-width="3"/><path d="M1480 710l50-10v105l-50 12z" fill="#b5985c"/>
+<path d="M900 895Q1430 850 1920 895" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 917Q1430 870 1920 917" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 939Q1430 890 1920 939" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 961Q1430 910 1920 961" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 983Q1430 930 1920 983" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 1005Q1430 950 1920 1005" fill="none" stroke="#edbd69" opacity=".09"/>
+<path d="M900 1027Q1430 970 1920 1027" fill="none" stroke="#edbd69" opacity=".09"/>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

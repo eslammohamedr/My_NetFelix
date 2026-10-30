@@ -1,0 +1,2 @@
+# Image decoding/validation for TV wallpaper uploads (also used by browser tests).
+Pillow>=11,<13

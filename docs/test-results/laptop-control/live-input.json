@@ -1,0 +1,16 @@
+{
+  "liveScreenVerifiedOnPhone": true,
+  "keyboardTextObserved": "netfelix linux control verified",
+  "fingerClickConfirmedByUser": true,
+  "linuxClickCount": 10,
+  "linuxPointerObserved": [
+    683,
+    240
+  ],
+  "physicalDisplay": ":0",
+  "physicalResolution": [
+    1366,
+    768
+  ],
+  "desktopBusCorrected": true
+}

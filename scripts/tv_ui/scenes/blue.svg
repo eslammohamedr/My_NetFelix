@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#14283e"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#63caff" stop-opacity=".5"/><stop offset="1" stop-color="#63caff" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#63caff"/><stop offset=".6" stop-color="#14283e"/><stop offset="1" stop-color="#63caff"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#63caff" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<path d="M700 650Q1150 310 1510 520T2100 430V1080H700Z" fill="#63caff" opacity="0.04"/>
+<path d="M700 760Q1150 420 1510 630T2100 540V1080H700Z" fill="#63caff" opacity="0.07500000000000001"/>
+<path d="M700 870Q1150 530 1510 740T2100 650V1080H700Z" fill="#63caff" opacity="0.11000000000000001"/>
+<path d="M700 980Q1150 640 1510 850T2100 760V1080H700Z" fill="#63caff" opacity="0.14500000000000002"/>
+<path d="M700 1090Q1150 750 1510 960T2100 870V1080H700Z" fill="#63caff" opacity="0.18000000000000002"/>
+<circle cx="1570" cy="320" r="95" fill="#63caff" opacity=".16"/>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

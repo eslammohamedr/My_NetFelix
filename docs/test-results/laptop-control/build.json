@@ -1,0 +1,33 @@
+{
+  "companionVersion": "1.2.2",
+  "rustdeskVersion": "1.5.0",
+  "serverVersion": "1.1.16",
+  "linuxDisplay": ":0",
+  "linuxResolution": [
+    1366,
+    768
+  ],
+  "apkSha256": "4ee36178d996b1209736e2b998ca230b1e93efcf7a07210017f444c11ab5d851",
+  "phoneScreenAndInputTest": "passed: live screen, finger clicks and lowercase keyboard text",
+  "privateServerRegistrationVerified": true,
+  "phoneRequestReachedLinuxAgent": true,
+  "desktopApprovalManagerStarted": true,
+  "screenInputValidation": "passed",
+  "metadataTestsPassed": 3,
+  "androidBuildPassed": true,
+  "installedApkMatchesBuild": true,
+  "linuxClientReady": true,
+  "physicalDesktopSession": "X11 :0",
+  "fileTransferValidation": "private session approved and remote file listing verified; completed download unverified",
+  "externalEngineSeparateTaskVerified": true,
+  "connectionUriEscapingCorrected": true,
+  "automaticAcceptance": {
+    "linuxApproveMode": "password",
+    "verificationMethod": "use-permanent-password",
+    "passwordRememberedOnPhone": true,
+    "freshAndroidProcessReconnectPassed": true,
+    "passwordPromptOnReconnect": false,
+    "localApprovalOnReconnect": false,
+    "liveDesktopOnReconnectVerified": true
+  }
+}

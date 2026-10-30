@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080"><defs>
+    <linearGradient id="sky" x2=".8" y2="1"><stop stop-color="#030815"/><stop offset="1" stop-color="#092b2a"/></linearGradient>
+    <radialGradient id="light"><stop stop-color="#88d6af" stop-opacity=".5"/><stop offset="1" stop-color="#88d6af" stop-opacity="0"/></radialGradient>
+    <linearGradient id="metal" x2=".8" y2="1"><stop stop-color="#fff"/><stop offset=".25" stop-color="#88d6af"/><stop offset=".6" stop-color="#092b2a"/><stop offset="1" stop-color="#88d6af"/></linearGradient>
+    <linearGradient id="fade"><stop stop-color="#030712" stop-opacity=".9"/><stop offset=".5" stop-color="#030712" stop-opacity=".25"/><stop offset="1" stop-color="#030712" stop-opacity="0"/></linearGradient>
+    <linearGradient id="horizon" x2="0" y2="1"><stop stop-color="#88d6af" stop-opacity=".5"/><stop offset="1" stop-color="#030712"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter></defs>
+    <rect width="1920" height="1080" fill="url(#sky)"/><ellipse cx="1510" cy="440" rx="760" ry="650" fill="url(#light)"/>
+<circle cx="1440" cy="230" r="90" fill="#88d6af" opacity=".12"/>
+<path d="M760 850Q1320 740 1920 840V1080H700Z" fill="#061019"/>
+<path d="M1090 800V470h28v330m-38-330h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#88d6af" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1680 800V450h28v330m-38-350h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#88d6af" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1835 800V560h28v330m-38-240h48m-35-16h22l-11-40z" fill="#1d343e" stroke="#88d6af" stroke-opacity=".45" stroke-width="3"/>
+<path d="M1210 660Q1210 560 1420 465Q1630 560 1630 660Z" fill="#4baf91" opacity=".85"/><path d="M1210 660H1630V840H1210Z" fill="#243943" stroke="#4baf91" stroke-width="3"/>
+<path d="M1420 465v-35" stroke="#4baf91" stroke-width="5"/><path d="M1427 405a12 12 0 1 0 6 20a13 13 0 0 1-6-20Z" fill="#4baf91"/>
+<path d="M1250 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M1310 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M1370 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M1430 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M1490 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M1550 815v-70q20-35 40 0v70" fill="#091621" stroke="#4baf91" stroke-opacity=".45"/>
+<path d="M900 895Q1430 850 1920 895" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 917Q1430 870 1920 917" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 939Q1430 890 1920 939" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 961Q1430 910 1920 961" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 983Q1430 930 1920 983" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 1005Q1430 950 1920 1005" fill="none" stroke="#88d6af" opacity=".09"/>
+<path d="M900 1027Q1430 970 1920 1027" fill="none" stroke="#88d6af" opacity=".09"/>
+<rect width="1920" height="1080" fill="url(#fade)"/></svg>

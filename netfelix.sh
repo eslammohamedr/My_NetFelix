@@ -61,6 +61,7 @@ print_urls() {
     printf "  %-18s %-32s %s\n" "Audiobookshelf" "http://${host_ip}:13378" "Audiobooks & Podcasts Streaming"
     printf "  %-18s %-32s %s\n" "Immich Photos" "http://${host_ip}:2283" "Google Photos Cloud Alternative"
     printf "  %-18s %-32s %s\n" "AdGuard Home" "http://${host_ip}:8085" "Ad-Blocker & Network Protection"
+    printf "  %-18s %-32s %s\n" "Retro Arcade" "http://${host_ip}:8095" "4K TV Gaming & Mobile Gamepad"
     echo "========================================================================="
     echo ""
 }
@@ -70,24 +71,24 @@ case "${1:-start}" in
         ensure_mounted
         echo ">> Starting My NetFelix stack..."
         docker compose up -d --build
-        systemctl --user restart netfelix-ai-agent.service 2>/dev/null || true
+        systemctl --user restart netfelix-ai-agent.service netfelix-arcade.service 2>/dev/null || true
         print_urls
         ;;
     stop|down)
         echo ">> Stopping My NetFelix stack..."
         docker compose down
-        systemctl --user stop netfelix-ai-agent.service 2>/dev/null || true
+        systemctl --user stop netfelix-ai-agent.service netfelix-arcade.service 2>/dev/null || true
         ;;
     restart)
         ensure_mounted
         echo ">> Restarting My NetFelix stack..."
         docker compose up -d --build --force-recreate
-        systemctl --user restart netfelix-ai-agent.service 2>/dev/null || true
+        systemctl --user restart netfelix-ai-agent.service netfelix-arcade.service 2>/dev/null || true
         print_urls
         ;;
     status|ps)
         docker compose ps
-        systemctl --user status netfelix-ai-agent.service --no-pager 2>/dev/null || true
+        systemctl --user status netfelix-ai-agent.service netfelix-arcade.service --no-pager 2>/dev/null || true
         print_urls
         ;;
     logs)

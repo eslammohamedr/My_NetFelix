@@ -1,0 +1,18 @@
+{
+  "decoded": {
+    "width": 640,
+    "height": 360,
+    "duration": 30,
+    "currentTime": 1.371,
+    "decodedFrames": 127
+  },
+  "forwardTime": 10.439,
+  "rewindTime": 0.023,
+  "pausedAt": 1.81,
+  "pause": true,
+  "seekForward": true,
+  "seekBackward": true,
+  "play": true,
+  "stop": true,
+  "home": true
+}

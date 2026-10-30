@@ -1,0 +1,6 @@
+test_side_menu_layout_and_focus_follow_position (test_tv_appearance_browser.BrowserFeatures.test_side_menu_layout_and_focus_follow_position) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.218s
+
+OK

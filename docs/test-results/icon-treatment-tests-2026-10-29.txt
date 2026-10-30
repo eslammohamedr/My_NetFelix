@@ -1,0 +1,8 @@
+test_all_icon_styles_preview_apply_and_survive_reload (test_tv_appearance_browser.BrowserFeatures.test_all_icon_styles_preview_apply_and_survive_reload) ... ok
+test_arabic_long_text_and_phone_tv_layouts (test_tv_appearance_browser.BrowserFeatures.test_arabic_long_text_and_phone_tv_layouts) ... ok
+test_preview_does_not_save_and_shares_actual_tv_icons (test_tv_appearance_browser.BrowserFeatures.test_preview_does_not_save_and_shares_actual_tv_icons) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 21.869s
+
+OK
